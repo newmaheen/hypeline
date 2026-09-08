@@ -1,208 +1,199 @@
 <nav class="hypeline-navbar">
+    <div class="container">
 
-    <div class="hypeline-nav-container">
+        <div class="hypeline-navbar-inner">
 
-        {{-- =========================
-             HEADER
-        ========================== --}}
+            {{-- LOGO --}}
+            <a href="{{ url('/') }}" class="hypeline-logo">
+                <img
+                    src="{{ asset('images/hypeline-logo-2.png') }}"
+                    alt="Hypeline"
+                    class="hypeline-logo-image"
+                >
 
-        <div class="hypeline-header-row">
-
-            {{-- Logo --}}
-            <a
-                href="{{ route('home') }}"
-                class="hypeline-logo"
-            >
-                HYPELINE
+                <span class="hypeline-logo-text">
+                    HYPELINE
+                </span>
             </a>
 
 
-            {{-- Mobile Menu Button --}}
+            {{-- MOBILE MENU BUTTON --}}
             <button
                 type="button"
                 class="hypeline-menu-button"
-                data-bs-toggle="collapse"
-                data-bs-target="#hypelineMenu"
+                id="hypelineMenuButton"
                 aria-controls="hypelineMenu"
                 aria-expanded="false"
                 aria-label="Toggle navigation"
             >
-
                 <span></span>
                 <span></span>
                 <span></span>
-
             </button>
 
-        </div>
 
+            {{-- NAVIGATION MENU --}}
+            <div class="hypeline-menu" id="hypelineMenu">
 
-        {{-- =========================
-             COLLAPSIBLE MENU
-        ========================== --}}
+                {{-- LEFT SIDE LINKS --}}
+                <div class="hypeline-menu-links">
 
-        <div
-            class="collapse hypeline-menu"
-            id="hypelineMenu"
-        >
-
-            {{-- Main Navigation --}}
-            <div class="hypeline-main-links">
-
-                <a href="{{ route('home') }}">
-                    Shop
-                </a>
-
-                <a href="{{ route('cart.index') }}">
-                    Cart
-                </a>
-
-                @auth
-
-                    <a href="{{ route('my-orders') }}">
-                        My Orders
+                    <a href="{{ url('/') }}">
+                        Home
                     </a>
 
-                @endauth
-
-            </div>
-
-
-            {{-- Account Navigation --}}
-            <div class="hypeline-account-links">
-
-                @auth
-
-                    {{-- Dashboard --}}
-                    <a
-                        href="{{ route('dashboard') }}"
-                        class="hypeline-outline-button"
-                    >
-                        Dashboard
+                    <a href="{{ url('/shop') }}">
+                        Shop
                     </a>
 
+                    @auth
+                        <a href="{{ route('orders.index') }}">
+                            My Orders
+                        </a>
+                    @endauth
 
-                    {{-- User Name --}}
-                    <a
-                        href="{{ route('profile.edit') }}"
-                        class="hypeline-user"
-                    >
-                        {{ Auth::user()->name }}
-                    </a>
+                </div>
 
 
-                    {{-- Logout --}}
-                    <form
-                        method="POST"
-                        action="{{ route('logout') }}"
-                    >
+                {{-- RIGHT SIDE AUTH LINKS --}}
+                <div class="hypeline-menu-auth">
 
-                        @csrf
+                    @guest
 
-                        <button
-                            type="submit"
-                            class="hypeline-dark-button"
+                        <a
+                            href="{{ route('login') }}"
+                            class="hypeline-login-button"
                         >
-                            Logout
-                        </button>
+                            Login
+                        </a>
 
-                    </form>
+                        <a
+                            href="{{ route('register') }}"
+                            class="hypeline-register-button"
+                        >
+                            Register
+                        </a>
 
-                @else
+                    @else
 
-                    {{-- Login --}}
-                    <a href="{{ route('login') }}">
-                        Login
-                    </a>
+                        <a
+                            href="{{ route('profile.edit') }}"
+                            class="hypeline-profile-button"
+                        >
+                            Profile
+                        </a>
 
+                        <form
+                            method="POST"
+                            action="{{ route('logout') }}"
+                            class="hypeline-logout-form"
+                        >
+                            @csrf
 
-                    {{-- Register --}}
-                    <a
-                        href="{{ route('register') }}"
-                        class="hypeline-dark-button"
-                    >
-                        Register
-                    </a>
+                            <button
+                                type="submit"
+                                class="hypeline-logout-button"
+                            >
+                                Logout
+                            </button>
+                        </form>
 
-                @endauth
+                    @endguest
+
+                </div>
 
             </div>
 
         </div>
 
     </div>
-
 </nav>
 
 
 <style>
 
-/* =====================================================
+/* =========================================================
    HYPELINE NAVBAR
-===================================================== */
+========================================================= */
 
 .hypeline-navbar {
-    width: 100%;
     background: #ffffff;
-    border-bottom: 1px solid #e8e8e8;
-
+    border-bottom: 1px solid #eeeeee;
+    width: 100%;
     position: relative;
-    z-index: 1000;
+    z-index: 9999;
+}
+
+.hypeline-navbar .container {
+    width: 100%;
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
 }
 
 
-/* =====================================================
-   CONTAINER
-===================================================== */
+/* =========================================================
+   MAIN NAVBAR ROW
+========================================================= */
 
-.hypeline-nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
-
-    padding: 0 25px;
-
+.hypeline-navbar-inner {
     min-height: 78px;
 
     display: flex;
     align-items: center;
+
+    position: relative;
 }
 
 
-/* =====================================================
-   HEADER ROW
-===================================================== */
-
-.hypeline-header-row {
-    display: flex;
-    align-items: center;
-}
-
-
-/* =====================================================
+/* =========================================================
    LOGO
-===================================================== */
+========================================================= */
 
 .hypeline-logo {
-    color: #111111 !important;
+    display: inline-flex;
+    align-items: center;
 
     text-decoration: none !important;
 
-    font-size: 25px;
+    line-height: 1;
+    white-space: nowrap;
+
+    gap: 10px;
+
+    flex-shrink: 0;
+}
+
+.hypeline-logo-image {
+    width: 125px;
+    height: auto;
+
+    max-height: 45px;
+
+    object-fit: contain;
+    object-position: left center;
+
+    display: block;
+}
+
+.hypeline-logo-text {
+    color: #111111 !important;
+
+    font-size: 22px;
     font-weight: 800;
 
-    letter-spacing: -1px;
+    letter-spacing: 2px;
+    line-height: 1;
 
-    white-space: nowrap;
-}
-
-.hypeline-logo:hover {
-    color: #111111 !important;
+    display: inline-block;
 }
 
 
-/* =====================================================
+/* =========================================================
    DESKTOP MENU
-===================================================== */
+========================================================= */
 
 .hypeline-menu {
     flex: 1;
@@ -215,17 +206,63 @@
 }
 
 
-.hypeline-main-links,
-.hypeline-account-links {
+/* =========================================================
+   LEFT MENU LINKS
+========================================================= */
+
+.hypeline-menu-links {
     display: flex;
     align-items: center;
 
-    gap: 28px;
+    gap: 34px;
+}
+
+.hypeline-menu-links a {
+    color: #111111 !important;
+
+    text-decoration: none !important;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.hypeline-menu-links a:hover {
+    color: #666666 !important;
 }
 
 
-.hypeline-main-links a,
-.hypeline-account-links a {
+/* =========================================================
+   RIGHT AUTH AREA
+========================================================= */
+
+.hypeline-menu-auth {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+.hypeline-login-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+
+    padding: 0 20px;
+
+    border: 1px solid #111111;
+    border-radius: 6px;
+
+    background: #ffffff !important;
+
     color: #111111 !important;
 
     text-decoration: none !important;
@@ -233,309 +270,433 @@
     font-size: 14px;
     font-weight: 600;
 
-    transition: .2s ease;
+    transition: 0.2s ease;
 }
 
-
-.hypeline-main-links a:hover,
-.hypeline-account-links a:hover {
-    color: #777777 !important;
-}
-
-
-/* =====================================================
-   USER
-===================================================== */
-
-.hypeline-user {
-    font-weight: 500 !important;
-}
-
-
-/* =====================================================
-   DASHBOARD BUTTON
-===================================================== */
-
-.hypeline-outline-button {
-    border: 1px solid #111111;
-
-    padding: 9px 17px;
-
-    border-radius: 3px;
-}
-
-
-.hypeline-outline-button:hover {
-    background: #111111;
-
+.hypeline-login-button:hover {
+    background: #111111 !important;
     color: #ffffff !important;
 }
 
 
-/* =====================================================
-   DARK BUTTON
-===================================================== */
+/* =========================================================
+   REGISTER
+========================================================= */
 
-.hypeline-dark-button {
+.hypeline-register-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+
+    padding: 0 20px;
+
+    border: 1px solid #111111 !important;
+    border-radius: 6px;
+
+    background-color: #111111 !important;
     background: #111111 !important;
 
     color: #ffffff !important;
 
-    border: 1px solid #111111;
-
-    padding: 10px 19px;
-
-    border-radius: 3px;
-
-    font-size: 13px !important;
-    font-weight: 700 !important;
-
     text-decoration: none !important;
 
-    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+
+    line-height: 1;
+
+    opacity: 1 !important;
+
+    transition: 0.2s ease;
 }
 
 
-.hypeline-dark-button:hover {
+/* Force Register text to stay WHITE */
+
+.hypeline-register-button:link,
+.hypeline-register-button:visited {
+    color: #ffffff !important;
+}
+
+.hypeline-register-button:hover {
+    background-color: #333333 !important;
     background: #333333 !important;
 
     color: #ffffff !important;
 }
 
+.hypeline-register-button:focus,
+.hypeline-register-button:active {
+    background-color: #111111 !important;
+    background: #111111 !important;
 
-/* =====================================================
-   LOGOUT FORM
-===================================================== */
+    color: #ffffff !important;
 
-.hypeline-account-links form {
-    margin: 0;
+    box-shadow: none !important;
 }
 
 
-/* =====================================================
-   MOBILE BUTTON
-===================================================== */
+/* =========================================================
+   PROFILE
+========================================================= */
+
+.hypeline-profile-button {
+    color: #111111 !important;
+
+    text-decoration: none !important;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.hypeline-profile-button:hover {
+    color: #666666 !important;
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.hypeline-logout-form {
+    margin: 0;
+    padding: 0;
+}
+
+.hypeline-logout-button {
+    border: 0;
+
+    background: transparent !important;
+
+    color: #111111 !important;
+
+    padding: 8px 0;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.hypeline-logout-button:hover {
+    color: #666666 !important;
+}
+
+
+/* =========================================================
+   MOBILE MENU BUTTON
+========================================================= */
 
 .hypeline-menu-button {
     display: none;
 
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
 
-    padding: 8px;
+    padding: 7px;
+
+    margin-left: auto;
+
+    border: 1px solid #111111;
+    border-radius: 6px;
 
     background: #ffffff;
 
-    border: 1px solid #dddddd;
-
-    border-radius: 4px;
-
     cursor: pointer;
 
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 
-    flex-direction: column;
+    gap: 5px;
 }
-
 
 .hypeline-menu-button span {
     display: block;
 
-    width: 24px;
+    width: 22px;
     height: 2px;
 
     background: #111111;
 
-    margin: 3px 0;
+    border-radius: 2px;
+
+    transition: 0.2s ease;
 }
 
 
-/* =====================================================
+/* =========================================================
    MOBILE
-===================================================== */
+========================================================= */
 
 @media (max-width: 991px) {
 
+    .hypeline-navbar-inner {
+        min-height: 70px;
 
-    /* Container */
-
-    .hypeline-nav-container {
-        display: block;
-
-        padding: 13px 18px;
-
-        min-height: auto;
-    }
-
-
-    /* Header */
-
-    .hypeline-header-row {
-        width: 100%;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: space-between;
+        flex-wrap: wrap;
     }
 
 
     /* Logo */
 
+    .hypeline-logo-image {
+        width: 115px;
+        max-height: 40px;
+    }
+
+    .hypeline-logo-text {
+        font-size: 20px;
+        letter-spacing: 1.5px;
+    }
+
     .hypeline-logo {
-        font-size: 23px;
+        gap: 8px;
     }
 
 
-    /* Three Lines */
+    /* 3 line button */
 
     .hypeline-menu-button {
         display: flex;
     }
 
 
-    /*
-    IMPORTANT:
-
-    Bootstrap controls:
-    .collapse
-    .show
-    .collapsing
-
-    So we DO NOT use
-    display:none/block here.
+    /* IMPORTANT:
+       Mobile menu is hidden until JS opens it
     */
 
-
-    /* Menu */
-
     .hypeline-menu {
+        display: none;
+
         width: 100%;
+
+        flex: none;
 
         margin-left: 0;
 
-        padding-top: 18px;
+        margin-top: 15px;
 
+        padding-top: 18px;
         padding-bottom: 18px;
 
-        margin-top: 13px;
-
         border-top: 1px solid #eeeeee;
+
+        background: #ffffff;
     }
 
 
-    /* Main Links */
+    .hypeline-menu.hypeline-menu-open {
+        display: block;
+    }
 
-    .hypeline-main-links {
+
+    /* Left links */
+
+    .hypeline-menu-links {
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 0;
+
+        width: 100%;
+    }
+
+    .hypeline-menu-links a {
+        display: block;
+
         width: 100%;
 
+        padding: 11px 0;
+
+        font-size: 15px;
+    }
+
+
+    /* Auth */
+
+    .hypeline-menu-auth {
         display: flex;
 
         flex-direction: column;
 
         align-items: stretch;
 
-        gap: 0;
-    }
-
-
-    .hypeline-main-links a {
         width: 100%;
 
-        display: block;
+        gap: 10px;
 
-        padding: 12px 5px;
+        margin-top: 10px;
 
-        font-size: 15px;
-    }
-
-
-    /* Account Section */
-
-    .hypeline-account-links {
-
-        width: 100%;
-
-        display: flex;
-
-        flex-direction: column;
-
-        align-items: stretch;
-
-        gap: 0;
+        padding-top: 15px;
 
         border-top: 1px solid #eeeeee;
-
-        margin-top: 12px;
-
-        padding-top: 12px;
     }
 
 
-    .hypeline-account-links a {
-
+    .hypeline-login-button,
+    .hypeline-register-button {
         width: 100%;
 
+        min-height: 44px;
+    }
+
+
+    .hypeline-profile-button {
         display: block;
 
-        padding: 12px 5px;
+        width: 100%;
 
-        font-size: 15px;
+        padding: 11px 0;
     }
 
 
-    /* Dashboard */
-
-    .hypeline-outline-button {
-
+    .hypeline-logout-form {
         width: 100%;
-
-        text-align: center;
-
-        margin-bottom: 5px;
     }
 
-
-    /* Logout */
-
-    .hypeline-account-links form {
-
+    .hypeline-logout-button {
         width: 100%;
 
-        margin-top: 5px;
-    }
+        text-align: left;
 
-
-    .hypeline-dark-button {
-
-        width: 100%;
-
-        display: block;
-
-        text-align: center;
+        padding: 11px 0;
     }
 
 }
 
 
-/* =====================================================
+/* =========================================================
    SMALL MOBILE
-===================================================== */
+========================================================= */
 
 @media (max-width: 575px) {
 
-    .hypeline-nav-container {
-        padding-left: 15px;
-        padding-right: 15px;
+    .hypeline-logo-image {
+        width: 105px;
+        max-height: 36px;
     }
 
+    .hypeline-logo-text {
+        font-size: 18px;
+        letter-spacing: 1.2px;
+    }
 
     .hypeline-logo {
-        font-size: 21px;
+        gap: 7px;
+    }
+
+    .hypeline-menu-button {
+        width: 40px;
+        height: 40px;
     }
 
 }
 
+
+/* =========================================================
+   MOBILE BUTTON OPEN ANIMATION
+========================================================= */
+
+.hypeline-menu-button.is-open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.hypeline-menu-button.is-open span:nth-child(2) {
+    opacity: 0;
+}
+
+.hypeline-menu-button.is-open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
 </style>
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const menuButton = document.getElementById('hypelineMenuButton');
+    const menu = document.getElementById('hypelineMenu');
+
+    if (!menuButton || !menu) {
+        return;
+    }
+
+
+    /* =====================================================
+       OPEN / CLOSE MOBILE MENU
+    ===================================================== */
+
+    menuButton.addEventListener('click', function () {
+
+        const isOpen = menu.classList.toggle('hypeline-menu-open');
+
+        menuButton.classList.toggle('is-open', isOpen);
+
+        menuButton.setAttribute(
+            'aria-expanded',
+            isOpen ? 'true' : 'false'
+        );
+
+    });
+
+
+    /* =====================================================
+       CLOSE MENU AFTER CLICKING A LINK
+    ===================================================== */
+
+    const menuLinks = menu.querySelectorAll('a');
+
+    menuLinks.forEach(function (link) {
+
+        link.addEventListener('click', function () {
+
+            if (window.innerWidth <= 991) {
+
+                menu.classList.remove('hypeline-menu-open');
+
+                menuButton.classList.remove('is-open');
+
+                menuButton.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
+
+            }
+
+        });
+
+    });
+
+
+    /* =====================================================
+       IF SCREEN CHANGES TO DESKTOP
+    ===================================================== */
+
+    window.addEventListener('resize', function () {
+
+        if (window.innerWidth > 991) {
+
+            menu.classList.remove('hypeline-menu-open');
+
+            menuButton.classList.remove('is-open');
+
+            menuButton.setAttribute(
+                'aria-expanded',
+                'false'
+            );
+
+        }
+
+    });
+
+});
+
+</script>
