@@ -64,7 +64,7 @@
             </div>
 
             <a
-                href="{{ route('categories.create') }}"
+                href="{{ route('admin.categories.create') }}"
                 class="btn btn-dark"
             >
                 + Add Category
@@ -180,7 +180,7 @@
                                         <td class="text-end px-4">
 
                                             <a
-                                                href="{{ route('categories.edit', $category->id) }}"
+                                                href="{{ route('admin.categories.edit', $category->id) }}"
                                                 class="btn btn-sm btn-outline-dark"
                                             >
                                                 Edit
@@ -189,7 +189,7 @@
 
                                             <form
                                                 method="POST"
-                                                action="{{ route('categories.destroy', $category->id) }}"
+                                                action="{{ route('admin.categories.destroy', $category->id) }}"
                                                 class="d-inline"
                                             >
 
@@ -234,7 +234,7 @@
                         </p>
 
                         <a
-                            href="{{ route('categories.create') }}"
+                            href="{{ route('admin.categories.create') }}"
                             class="btn btn-dark"
                         >
                             + Add Category

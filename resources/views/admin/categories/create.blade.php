@@ -32,7 +32,7 @@
             </a>
 
             <a
-                href="{{ route('categories.index') }}"
+                href="{{ route('admin.categories.index') }}"
                 class="btn btn-outline-light btn-sm"
             >
                 Categories
@@ -101,7 +101,7 @@
 
                         <form
                             method="POST"
-                            action="{{ route('categories.store') }}"
+                            action="{{ route('admin.categories.store') }}"
                         >
 
                             @csrf
@@ -216,7 +216,7 @@
                                 </button>
 
                                 <a
-                                    href="{{ route('categories.index') }}"
+                                    href="{{ route('admin.categories.index') }}"
                                     class="btn btn-outline-secondary px-4"
                                 >
                                     Cancel

@@ -1,10 +1,13 @@
 <nav class="hypeline-navbar">
+
     <div class="container">
 
         <div class="hypeline-navbar-inner">
 
             {{-- LOGO --}}
+
             <a href="{{ url('/') }}" class="hypeline-logo">
+
                 <img
                     src="{{ asset('images/hypeline-logo-2.png') }}"
                     alt="Hypeline"
@@ -14,10 +17,12 @@
                 <span class="hypeline-logo-text">
                     HYPELINE
                 </span>
+
             </a>
 
 
             {{-- MOBILE MENU BUTTON --}}
+
             <button
                 type="button"
                 class="hypeline-menu-button"
@@ -26,36 +31,69 @@
                 aria-expanded="false"
                 aria-label="Toggle navigation"
             >
+
                 <span></span>
                 <span></span>
                 <span></span>
+
             </button>
 
 
             {{-- NAVIGATION MENU --}}
+
             <div class="hypeline-menu" id="hypelineMenu">
 
+
                 {{-- LEFT SIDE LINKS --}}
+
                 <div class="hypeline-menu-links">
+
+                    {{-- HOME --}}
 
                     <a href="{{ url('/') }}">
                         Home
                     </a>
 
+
+                    {{-- SHOP 
+
                     <a href="{{ url('/shop') }}">
                         Shop
                     </a>
+                    --}}
+
+                    {{-- CATEGORIES --}}
+
+                    @php
+                        $navbarCategories = \App\Models\Category::where('is_active', true)
+                            ->orderBy('name')
+                            ->get();
+                    @endphp
+
+                    @foreach($navbarCategories as $category)
+
+                        <a href="{{ route('category.products', $category->slug) }}">
+                            {{ $category->name }}
+                        </a>
+
+                    @endforeach
+
+
+                    {{-- MY ORDERS --}}
 
                     @auth
+
                         <a href="{{ route('orders.index') }}">
                             My Orders
                         </a>
+
                     @endauth
 
                 </div>
 
 
                 {{-- RIGHT SIDE AUTH LINKS --}}
+
                 <div class="hypeline-menu-auth">
 
                     @guest
@@ -88,6 +126,7 @@
                             action="{{ route('logout') }}"
                             class="hypeline-logout-form"
                         >
+
                             @csrf
 
                             <button
@@ -96,6 +135,7 @@
                             >
                                 Logout
                             </button>
+
                         </form>
 
                     @endguest
@@ -107,7 +147,9 @@
         </div>
 
     </div>
+
 </nav>
+
 
 
 <style>
@@ -117,20 +159,34 @@
 ========================================================= */
 
 .hypeline-navbar {
+
     background: #ffffff;
+
     border-bottom: 1px solid #eeeeee;
+
     width: 100%;
+
     position: relative;
+
     z-index: 9999;
+
 }
 
+
 .hypeline-navbar .container {
+
     width: 100%;
+
     max-width: 1320px;
+
     margin-left: auto;
+
     margin-right: auto;
+
     padding-left: 24px;
+
     padding-right: 24px;
+
 }
 
 
@@ -139,12 +195,15 @@
 ========================================================= */
 
 .hypeline-navbar-inner {
+
     min-height: 78px;
 
     display: flex;
+
     align-items: center;
 
     position: relative;
+
 }
 
 
@@ -153,41 +212,55 @@
 ========================================================= */
 
 .hypeline-logo {
+
     display: inline-flex;
+
     align-items: center;
 
     text-decoration: none !important;
 
     line-height: 1;
+
     white-space: nowrap;
 
     gap: 10px;
 
     flex-shrink: 0;
+
 }
 
+
 .hypeline-logo-image {
+
     width: 125px;
+
     height: auto;
 
     max-height: 45px;
 
     object-fit: contain;
+
     object-position: left center;
 
     display: block;
+
 }
 
+
 .hypeline-logo-text {
+
     color: #111111 !important;
 
     font-size: 22px;
+
     font-weight: 800;
 
     letter-spacing: 2px;
+
     line-height: 1;
 
     display: inline-block;
+
 }
 
 
@@ -196,13 +269,17 @@
 ========================================================= */
 
 .hypeline-menu {
+
     flex: 1;
 
     margin-left: 70px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
+
 }
 
 
@@ -211,25 +288,35 @@
 ========================================================= */
 
 .hypeline-menu-links {
+
     display: flex;
+
     align-items: center;
 
     gap: 34px;
+
 }
 
+
 .hypeline-menu-links a {
+
     color: #111111 !important;
 
     text-decoration: none !important;
 
     font-size: 15px;
+
     font-weight: 600;
 
     transition: 0.2s ease;
+
 }
 
+
 .hypeline-menu-links a:hover {
+
     color: #666666 !important;
+
 }
 
 
@@ -238,10 +325,13 @@
 ========================================================= */
 
 .hypeline-menu-auth {
+
     display: flex;
+
     align-items: center;
 
     gap: 12px;
+
 }
 
 
@@ -250,8 +340,11 @@
 ========================================================= */
 
 .hypeline-login-button {
+
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
 
     min-height: 42px;
@@ -259,6 +352,7 @@
     padding: 0 20px;
 
     border: 1px solid #111111;
+
     border-radius: 6px;
 
     background: #ffffff !important;
@@ -268,14 +362,20 @@
     text-decoration: none !important;
 
     font-size: 14px;
+
     font-weight: 600;
 
     transition: 0.2s ease;
+
 }
 
+
 .hypeline-login-button:hover {
+
     background: #111111 !important;
+
     color: #ffffff !important;
+
 }
 
 
@@ -284,8 +384,11 @@
 ========================================================= */
 
 .hypeline-register-button {
+
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
 
     min-height: 42px;
@@ -293,9 +396,11 @@
     padding: 0 20px;
 
     border: 1px solid #111111 !important;
+
     border-radius: 6px;
 
     background-color: #111111 !important;
+
     background: #111111 !important;
 
     color: #ffffff !important;
@@ -303,6 +408,7 @@
     text-decoration: none !important;
 
     font-size: 14px;
+
     font-weight: 600;
 
     line-height: 1;
@@ -310,31 +416,42 @@
     opacity: 1 !important;
 
     transition: 0.2s ease;
+
 }
 
-
-/* Force Register text to stay WHITE */
 
 .hypeline-register-button:link,
+
 .hypeline-register-button:visited {
+
     color: #ffffff !important;
+
 }
 
+
 .hypeline-register-button:hover {
+
     background-color: #333333 !important;
+
     background: #333333 !important;
 
     color: #ffffff !important;
+
 }
 
+
 .hypeline-register-button:focus,
+
 .hypeline-register-button:active {
+
     background-color: #111111 !important;
+
     background: #111111 !important;
 
     color: #ffffff !important;
 
     box-shadow: none !important;
+
 }
 
 
@@ -343,16 +460,22 @@
 ========================================================= */
 
 .hypeline-profile-button {
+
     color: #111111 !important;
 
     text-decoration: none !important;
 
     font-size: 14px;
+
     font-weight: 600;
+
 }
 
+
 .hypeline-profile-button:hover {
+
     color: #666666 !important;
+
 }
 
 
@@ -361,11 +484,16 @@
 ========================================================= */
 
 .hypeline-logout-form {
+
     margin: 0;
+
     padding: 0;
+
 }
 
+
 .hypeline-logout-button {
+
     border: 0;
 
     background: transparent !important;
@@ -375,13 +503,18 @@
     padding: 8px 0;
 
     font-size: 14px;
+
     font-weight: 600;
 
     cursor: pointer;
+
 }
 
+
 .hypeline-logout-button:hover {
+
     color: #666666 !important;
+
 }
 
 
@@ -390,9 +523,11 @@
 ========================================================= */
 
 .hypeline-menu-button {
+
     display: none;
 
     width: 42px;
+
     height: 42px;
 
     padding: 7px;
@@ -400,6 +535,7 @@
     margin-left: auto;
 
     border: 1px solid #111111;
+
     border-radius: 6px;
 
     background: #ffffff;
@@ -407,16 +543,22 @@
     cursor: pointer;
 
     flex-direction: column;
+
     align-items: center;
+
     justify-content: center;
 
     gap: 5px;
+
 }
 
+
 .hypeline-menu-button span {
+
     display: block;
 
     width: 22px;
+
     height: 2px;
 
     background: #111111;
@@ -424,6 +566,7 @@
     border-radius: 2px;
 
     transition: 0.2s ease;
+
 }
 
 
@@ -434,41 +577,54 @@
 @media (max-width: 991px) {
 
     .hypeline-navbar-inner {
+
         min-height: 70px;
 
         flex-wrap: wrap;
+
     }
 
 
     /* Logo */
 
     .hypeline-logo-image {
+
         width: 115px;
+
         max-height: 40px;
+
     }
+
 
     .hypeline-logo-text {
+
         font-size: 20px;
+
         letter-spacing: 1.5px;
+
     }
 
+
     .hypeline-logo {
+
         gap: 8px;
+
     }
 
 
     /* 3 line button */
 
     .hypeline-menu-button {
+
         display: flex;
+
     }
 
 
-    /* IMPORTANT:
-       Mobile menu is hidden until JS opens it
-    */
+    /* Mobile menu */
 
     .hypeline-menu {
+
         display: none;
 
         width: 100%;
@@ -480,22 +636,27 @@
         margin-top: 15px;
 
         padding-top: 18px;
+
         padding-bottom: 18px;
 
         border-top: 1px solid #eeeeee;
 
         background: #ffffff;
+
     }
 
 
     .hypeline-menu.hypeline-menu-open {
+
         display: block;
+
     }
 
 
     /* Left links */
 
     .hypeline-menu-links {
+
         display: flex;
 
         flex-direction: column;
@@ -505,9 +666,12 @@
         gap: 0;
 
         width: 100%;
+
     }
 
+
     .hypeline-menu-links a {
+
         display: block;
 
         width: 100%;
@@ -515,12 +679,14 @@
         padding: 11px 0;
 
         font-size: 15px;
+
     }
 
 
     /* Auth */
 
     .hypeline-menu-auth {
+
         display: flex;
 
         flex-direction: column;
@@ -536,36 +702,47 @@
         padding-top: 15px;
 
         border-top: 1px solid #eeeeee;
+
     }
 
 
     .hypeline-login-button,
+
     .hypeline-register-button {
+
         width: 100%;
 
         min-height: 44px;
+
     }
 
 
     .hypeline-profile-button {
+
         display: block;
 
         width: 100%;
 
         padding: 11px 0;
+
     }
 
 
     .hypeline-logout-form {
+
         width: 100%;
+
     }
 
+
     .hypeline-logout-button {
+
         width: 100%;
 
         text-align: left;
 
         padding: 11px 0;
+
     }
 
 }
@@ -578,22 +755,36 @@
 @media (max-width: 575px) {
 
     .hypeline-logo-image {
+
         width: 105px;
+
         max-height: 36px;
+
     }
+
 
     .hypeline-logo-text {
+
         font-size: 18px;
+
         letter-spacing: 1.2px;
+
     }
+
 
     .hypeline-logo {
+
         gap: 7px;
+
     }
 
+
     .hypeline-menu-button {
+
         width: 40px;
+
         height: 40px;
+
     }
 
 }
@@ -604,29 +795,44 @@
 ========================================================= */
 
 .hypeline-menu-button.is-open span:nth-child(1) {
+
     transform: translateY(7px) rotate(45deg);
+
 }
+
 
 .hypeline-menu-button.is-open span:nth-child(2) {
+
     opacity: 0;
+
 }
 
+
 .hypeline-menu-button.is-open span:nth-child(3) {
+
     transform: translateY(-7px) rotate(-45deg);
+
 }
 
 </style>
+
 
 
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    const menuButton = document.getElementById('hypelineMenuButton');
-    const menu = document.getElementById('hypelineMenu');
+    const menuButton =
+        document.getElementById('hypelineMenuButton');
+
+    const menu =
+        document.getElementById('hypelineMenu');
+
 
     if (!menuButton || !menu) {
+
         return;
+
     }
 
 
@@ -636,7 +842,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     menuButton.addEventListener('click', function () {
 
-        const isOpen = menu.classList.toggle('hypeline-menu-open');
+        const isOpen =
+            menu.classList.toggle('hypeline-menu-open');
 
         menuButton.classList.toggle('is-open', isOpen);
 
@@ -652,7 +859,9 @@ document.addEventListener('DOMContentLoaded', function () {
        CLOSE MENU AFTER CLICKING A LINK
     ===================================================== */
 
-    const menuLinks = menu.querySelectorAll('a');
+    const menuLinks =
+        menu.querySelectorAll('a');
+
 
     menuLinks.forEach(function (link) {
 
@@ -660,9 +869,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (window.innerWidth <= 991) {
 
-                menu.classList.remove('hypeline-menu-open');
+                menu.classList.remove(
+                    'hypeline-menu-open'
+                );
 
-                menuButton.classList.remove('is-open');
+                menuButton.classList.remove(
+                    'is-open'
+                );
 
                 menuButton.setAttribute(
                     'aria-expanded',
@@ -684,9 +897,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (window.innerWidth > 991) {
 
-            menu.classList.remove('hypeline-menu-open');
+            menu.classList.remove(
+                'hypeline-menu-open'
+            );
 
-            menuButton.classList.remove('is-open');
+            menuButton.classList.remove(
+                'is-open'
+            );
 
             menuButton.setAttribute(
                 'aria-expanded',
@@ -700,3 +917,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 </script>
+

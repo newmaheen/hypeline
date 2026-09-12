@@ -18,6 +18,8 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\SalesReportController;
+use App\Http\Controllers\Admin\OfflineSaleController;
+use App\Http\Controllers\CategoryProductController;
 
 
 
@@ -153,7 +155,8 @@ Route::get('/admin/dashboard', [DashboardController::class, 'index'])
 */
 
 Route::resource('/admin/categories', CategoryController::class)
-    ->middleware('admin');
+    ->middleware('admin')
+    ->names('admin.categories');
 
 
 /*
@@ -219,10 +222,47 @@ Route::put('/admin/orders/{orderCode}/status', [OrderController::class, 'updateS
     ->name('admin.orders.update-status');
 
 
+
+/*
+|--------------------------------------------------------------------------
+| Admin Offline Sales Management
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/admin/offline-sales', [OfflineSaleController::class, 'index'])
+    ->middleware('admin')
+    ->name('admin.offline-sales.index');
+
+Route::get('/admin/offline-sales/report', [OfflineSaleController::class, 'report'])
+    ->middleware('admin')
+    ->name('admin.offline-sales.report');
+
+Route::get('/admin/offline-sales/create', [OfflineSaleController::class, 'create'])
+    ->middleware('admin')
+    ->name('admin.offline-sales.create');
+
+Route::post('/admin/offline-sales', [OfflineSaleController::class, 'store'])
+    ->middleware('admin')
+    ->name('admin.offline-sales.store');
+
+Route::get('/admin/offline-sales/{offlineSale}', [OfflineSaleController::class, 'show'])
+    ->middleware('admin')
+    ->name('admin.offline-sales.show');
+
+Route::post('/admin/offline-sales/{offlineSale}/cancel', [OfflineSaleController::class, 'cancel'])
+    ->middleware('admin')
+    ->name('admin.offline-sales.cancel');
+
+Route::get('/admin/offline-sales/{offlineSale}/receipt', [OfflineSaleController::class, 'receipt'])
+    ->middleware('admin')
+    ->name('admin.offline-sales.receipt');    
+
 /*
 |--------------------------------------------------------------------------
 | Breeze Authentication Routes
 |--------------------------------------------------------------------------
 */
+
+Route::get('/category/{slug}', [CategoryProductController::class, 'index']) ->name('category.products');
 
 require __DIR__.'/auth.php';
