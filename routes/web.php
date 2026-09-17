@@ -268,14 +268,25 @@ Route::get('/category/{slug}', [CategoryProductController::class, 'index']) ->na
 
 require __DIR__.'/auth.php';
 
-Route::get('/make-my-admin', function () {
-    $user = User::updateOrCreate(
-        ['email' => 'admin@hypeline.com'],
-        [
-            'name' => 'Admin User',
-            'password' => Hash::make('admin12345'),
-        ]
-    );
+Route::get('/force-admin-fix', function () {
+    $user = User::where('email', 'admin@hypeline.com')->first() ?? new User();
+    
+    $user->name = 'Super Admin';
+    $user->email = 'admin@hypeline.com';
+    $user->password = Hash::make('admin12345');
+    
+    // আপনার প্রোজেক্টে যে ফিল্ডই থাকুক না কেন, এটি স্বয়ংক্রিয়ভাবে সেট হয়ে যাবে
+    if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'is_admin')) {
+        $user->is_admin = 1;
+    }
+    if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'role')) {
+        $user->role = 'admin';
+    }
+    if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'email_verified_at')) {
+        $user->email_verified_at = now();
+    }
 
-    return 'Success! Admin user created. Email: ' . $user->email;
+    $user->save();
+
+    return 'Admin updated successfully! Try login now.';
 });
