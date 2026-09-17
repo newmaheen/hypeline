@@ -21,10 +21,6 @@ use App\Http\Controllers\Admin\SalesReportController;
 use App\Http\Controllers\Admin\OfflineSaleController;
 use App\Http\Controllers\CategoryProductController;
 
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-
-
 /*
 |--------------------------------------------------------------------------
 | Customer Routes
@@ -74,7 +70,7 @@ Route::put('/cart/update/{variant}', [CartController::class, 'update'])
 
 /*
 |--------------------------------------------------------------------------
-| Customer Authentication
+| Customer Authentication & Dashboard
 |--------------------------------------------------------------------------
 */
 
@@ -92,8 +88,7 @@ Route::get('/dashboard', function () {
 
 Route::get('/my-orders', [MyOrderController::class, 'index'])
     ->middleware('auth')
-    ->name('my-orders');
-
+    ->name('orders.index');
 
 Route::get('/my-orders/{orderCode}', [MyOrderController::class, 'show'])
     ->middleware('auth')
@@ -103,6 +98,7 @@ Route::post('/my-orders/{orderCode}/cancel', [MyOrderController::class, 'cancel'
     ->middleware('auth')
     ->name('my-orders.cancel');
 
+
 /*
 |--------------------------------------------------------------------------
 | Customer Profile
@@ -110,7 +106,6 @@ Route::post('/my-orders/{orderCode}/cancel', [MyOrderController::class, 'cancel'
 */
 
 Route::middleware('auth')->group(function () {
-
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
@@ -119,7 +114,6 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
-
 });
 
 
@@ -201,6 +195,7 @@ Route::get('/admin/sales-report', [SalesReportController::class, 'index'])
     ->middleware('admin')
     ->name('admin.sales-report.index');
 
+
 /*
 |--------------------------------------------------------------------------
 | Admin Order Management
@@ -222,7 +217,6 @@ Route::post('/admin/orders/{orderCode}/approve-payment', [OrderController::class
 Route::put('/admin/orders/{orderCode}/status', [OrderController::class, 'updateStatus'])
     ->middleware('admin')
     ->name('admin.orders.update-status');
-
 
 
 /*
@@ -257,42 +251,16 @@ Route::post('/admin/offline-sales/{offlineSale}/cancel', [OfflineSaleController:
 
 Route::get('/admin/offline-sales/{offlineSale}/receipt', [OfflineSaleController::class, 'receipt'])
     ->middleware('admin')
-    ->name('admin.offline-sales.receipt');    
+    ->name('admin.offline-sales.receipt');
+
 
 /*
 |--------------------------------------------------------------------------
-| Breeze Authentication Routes
+| Breeze & Category Routes
 |--------------------------------------------------------------------------
 */
 
-Route::get('/category/{slug}', [CategoryProductController::class, 'index']) ->name('category.products');
+Route::get('/category/{slug}', [CategoryProductController::class, 'index'])
+    ->name('category.products');
 
 require __DIR__.'/auth.php';
-
-Route::get('/create-guard-admin', function () {
-    // config/auth.php অনুযায়ী মডেল বা টেবিল খুঁজে বের করা
-    $adminModelClass = config('auth.providers.admins.model') ?? 'App\Models\Admin';
-
-    if (class_exists($adminModelClass)) {
-        $admin = $adminModelClass::firstOrNew(['email' => 'admin@hypeline.com']);
-        $admin->name = 'Super Admin';
-        $admin->email = 'admin@hypeline.com';
-        $admin->password = Hash::make('admin12345');
-        $admin->save();
-
-        return "Admin model [{$adminModelClass}] updated successfully! Email: admin@hypeline.com | Password: admin12345";
-    }
-
-    // মডেল না থাকলে সরাসরি admins টেবিলে ডেটা ইনসার্ট
-    DB::table('admins')->updateOrInsert(
-        ['email' => 'admin@hypeline.com'],
-        [
-            'name' => 'Super Admin',
-            'password' => Hash::make('admin12345'),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]
-    );
-
-    return "Inserted directly into 'admins' table! Email: admin@hypeline.com | Password: admin12345";
-});
