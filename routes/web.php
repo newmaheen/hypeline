@@ -20,8 +20,9 @@ use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\SalesReportController;
 use App\Http\Controllers\Admin\OfflineSaleController;
 use App\Http\Controllers\CategoryProductController;
-use App\Models\User;
+
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 
 /*
@@ -268,25 +269,30 @@ Route::get('/category/{slug}', [CategoryProductController::class, 'index']) ->na
 
 require __DIR__.'/auth.php';
 
-Route::get('/force-admin-fix', function () {
-    $user = User::where('email', 'admin@hypeline.com')->first() ?? new User();
-    
-    $user->name = 'Super Admin';
-    $user->email = 'admin@hypeline.com';
-    $user->password = Hash::make('admin12345');
-    
-    // আপনার প্রোজেক্টে যে ফিল্ডই থাকুক না কেন, এটি স্বয়ংক্রিয়ভাবে সেট হয়ে যাবে
-    if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'is_admin')) {
-        $user->is_admin = 1;
-    }
-    if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'role')) {
-        $user->role = 'admin';
-    }
-    if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'email_verified_at')) {
-        $user->email_verified_at = now();
+Route::get('/create-guard-admin', function () {
+    // config/auth.php অনুযায়ী মডেল বা টেবিল খুঁজে বের করা
+    $adminModelClass = config('auth.providers.admins.model') ?? 'App\Models\Admin';
+
+    if (class_exists($adminModelClass)) {
+        $admin = $adminModelClass::firstOrNew(['email' => 'admin@hypeline.com']);
+        $admin->name = 'Super Admin';
+        $admin->email = 'admin@hypeline.com';
+        $admin->password = Hash::make('admin12345');
+        $admin->save();
+
+        return "Admin model [{$adminModelClass}] updated successfully! Email: admin@hypeline.com | Password: admin12345";
     }
 
-    $user->save();
+    // মডেল না থাকলে সরাসরি admins টেবিলে ডেটা ইনসার্ট
+    DB::table('admins')->updateOrInsert(
+        ['email' => 'admin@hypeline.com'],
+        [
+            'name' => 'Super Admin',
+            'password' => Hash::make('admin12345'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]
+    );
 
-    return 'Admin updated successfully! Try login now.';
+    return "Inserted directly into 'admins' table! Email: admin@hypeline.com | Password: admin12345";
 });
