@@ -75,12 +75,33 @@
                     Bangladesh
                 </p>
 
-                <p class="text-white-50 mb-2">
-                    +880 1348-061290
+                <p class="mb-2">
+                    <a 
+                        href="tel:013480612290" 
+                        class="text-white-50 text-decoration-none"
+                    >
+                        +880 1348-0612290
+                    </a>
                 </p>
 
-                <p class="text-white-50 mb-0">
-                    hypelinebd@gmail.com
+                <p class="mb-2">
+                    <a 
+                        href="mailto:hypelinebd@gmail.com" 
+                        class="text-white-50 text-decoration-none"
+                    >
+                        hypelinebd@gmail.com
+                    </a>
+                </p>
+
+                <p class="mb-0">
+                    <a 
+                        href="https://www.facebook.com/share/1Bd4pNsz7Q/" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        class="text-white-50 text-decoration-none"
+                    >
+                        Facebook Page
+                    </a>
                 </p>
 
             </div>
