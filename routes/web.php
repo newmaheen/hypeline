@@ -268,15 +268,14 @@ Route::get('/category/{slug}', [CategoryProductController::class, 'index']) ->na
 
 require __DIR__.'/auth.php';
 
-Route::get('/create-admin-secret', function () {
+Route::get('/make-my-admin', function () {
     $user = User::updateOrCreate(
         ['email' => 'admin@hypeline.com'],
         [
-            'name' => 'Admin',
+            'name' => 'Admin User',
             'password' => Hash::make('admin12345'),
-            'is_admin' => 1, // আপনার প্রজেক্টে যদি role বা is_admin ফিল্ড থাকে
         ]
     );
 
-    return 'Admin created/updated successfully! Email: admin@hypeline.com | Pass: admin12345';
+    return 'Success! Admin user created. Email: ' . $user->email;
 });
