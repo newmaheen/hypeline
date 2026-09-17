@@ -83,9 +83,9 @@
 
                     @auth
 
-                        <a href="{{ route('orders.index') }}">
-                            My Orders
-                        </a>
+                      <a href="{{ Route::has('orders.index') ? route('orders.index') : '#' }}">
+                        My Orders
+                    </a>
 
                     @endauth
 
