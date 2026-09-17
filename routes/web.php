@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MyOrderController;
@@ -20,6 +19,10 @@ use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\SalesReportController;
 use App\Http\Controllers\Admin\OfflineSaleController;
 use App\Http\Controllers\CategoryProductController;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -280,14 +283,33 @@ Route::get('/run-storage-link', function () {
     return 'Storage linked successfully!';
 });
 
+PHP
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/reset-admin-pass', function () {
-    $admin = Admin::first();
+    $admin = DB::table('admins')->first();
+
     if ($admin) {
-        $admin->email = 'admin@gmail.com';
-        $admin->password = Hash::make('12345678');
-        $admin->save();
-        return "Admin Email: " . $admin->email . " | New Password: 12345678";
+        DB::table('admins')
+            ->where('id', $admin->id)
+            ->update([
+                'email'    => 'admin@gmail.com',
+                'password' => Hash::make('12345678'),
+            ]);
+
+        return "Success! Email: admin@gmail.com | Password: 12345678";
     }
-    return "No admin found";
+
+    // যদি admins টেবিলে কোনো রো না থাকে, তবে নতুন রো তৈরি করবে
+    DB::table('admins')->insert([
+        'name'       => 'Super Admin',
+        'email'      => 'admin@gmail.com',
+        'password'   => Hash::make('12345678'),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    return "Created New Admin! Email: admin@gmail.com | Password: 12345678";
 });
