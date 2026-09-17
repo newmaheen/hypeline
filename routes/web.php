@@ -88,6 +88,10 @@ Route::get('/dashboard', function () {
 
 Route::get('/my-orders', [MyOrderController::class, 'index'])
     ->middleware('auth')
+    ->name('my-orders');
+
+Route::get('/orders', fn () => redirect()->route('my-orders'))
+    ->middleware('auth')
     ->name('orders.index');
 
 Route::get('/my-orders/{orderCode}', [MyOrderController::class, 'show'])
