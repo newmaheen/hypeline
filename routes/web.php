@@ -270,3 +270,8 @@ Route::get('/clear-all-cache', function () {
     \Illuminate\Support\Facades\Artisan::call('optimize:clear');
     return 'All cache cleared successfully!';
 });
+
+Route::get('/run-storage-link', function () {
+    \Illuminate\Support\Facades\Artisan::call('storage:link');
+    return 'Storage linked successfully!';
+});
