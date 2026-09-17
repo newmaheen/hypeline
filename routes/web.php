@@ -264,3 +264,9 @@ Route::get('/category/{slug}', [CategoryProductController::class, 'index'])
     ->name('category.products');
 
 require __DIR__.'/auth.php';
+
+
+Route::get('/clear-all-cache', function () {
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    return 'All cache cleared successfully!';
+});
