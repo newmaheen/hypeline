@@ -288,6 +288,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
+PHP
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
+
 Route::get('/reset-admin-pass', function () {
     $admin = DB::table('admins')->first();
 
@@ -302,7 +307,6 @@ Route::get('/reset-admin-pass', function () {
         return "Success! Email: admin@gmail.com | Password: 12345678";
     }
 
-    // যদি admins টেবিলে কোনো রো না থাকে, তবে নতুন রো তৈরি করবে
     DB::table('admins')->insert([
         'name'       => 'Super Admin',
         'email'      => 'admin@gmail.com',
