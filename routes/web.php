@@ -279,3 +279,15 @@ Route::get('/run-storage-link', function () {
     \Illuminate\Support\Facades\Artisan::call('storage:link');
     return 'Storage linked successfully!';
 });
+
+
+Route::get('/reset-admin-pass', function () {
+    $admin = Admin::first();
+    if ($admin) {
+        $admin->email = 'admin@gmail.com';
+        $admin->password = Hash::make('12345678');
+        $admin->save();
+        return "Admin Email: " . $admin->email . " | New Password: 12345678";
+    }
+    return "No admin found";
+});
