@@ -1,15 +1,12 @@
 <?php
 
-
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MyOrderController;
-
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\OrderController;
-
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StoreProductController;
 use App\Http\Controllers\CartController;
@@ -19,9 +16,6 @@ use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\SalesReportController;
 use App\Http\Controllers\Admin\OfflineSaleController;
 use App\Http\Controllers\CategoryProductController;
-
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,6 +29,9 @@ Route::get('/', [HomeController::class, 'index'])
 
 Route::get('/products/{slug}', [StoreProductController::class, 'show'])
     ->name('products.show');
+
+Route::get('/category/{slug}', [CategoryProductController::class, 'index'])
+    ->name('category.products');
 
 Route::get('/checkout', [CheckoutController::class, 'index'])
     ->name('checkout.index');
@@ -142,178 +139,89 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])
 
 /*
 |--------------------------------------------------------------------------
-| Admin Dashboard
+| Admin Protected Routes
 |--------------------------------------------------------------------------
 */
 
-Route::get('/admin/dashboard', [DashboardController::class, 'index'])
-    ->middleware('admin')
-    ->name('admin.dashboard');
+Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+
+    // Admin Password Change
+    Route::get('/password/change', [AdminAuthController::class, 'showChangePasswordForm'])
+        ->name('password.change');
+
+    Route::post('/password/change', [AdminAuthController::class, 'updatePassword'])
+        ->name('password.update');
+
+    // Category Management
+    Route::resource('categories', CategoryController::class)
+        ->names('categories');
+
+    // Product Management
+    Route::resource('products', ProductController::class)
+        ->names('products');
+
+    // Product Variant Management
+    Route::resource('products/{product}/variants', ProductVariantController::class)
+        ->names('variants');
+
+    // Inventory & Reports
+    Route::get('/inventory', [InventoryController::class, 'index'])
+        ->name('inventory.index');
+
+    Route::put('/inventory/{variant}', [InventoryController::class, 'update'])
+        ->name('inventory.update');
+
+    Route::get('/sales-report', [SalesReportController::class, 'index'])
+        ->name('sales-report.index');
+
+    // Order Management
+    Route::get('/orders', [OrderController::class, 'index'])
+        ->name('orders.index');
+
+    Route::get('/orders/{orderCode}', [OrderController::class, 'show'])
+        ->name('orders.show');
+
+    Route::put('/orders/{orderCode}/status', [OrderController::class, 'updateStatus'])
+        ->name('orders.update-status');
+
+    Route::post('/orders/{orderCode}/approve-payment', [OrderController::class, 'approvePayment'])
+        ->name('orders.approve-payment');
+
+    Route::post('/orders/{orderCode}/decline-payment', [OrderController::class, 'declinePayment'])
+        ->name('orders.decline-payment');
+
+    // Offline Sales (POS)
+    Route::get('/offline-sales', [OfflineSaleController::class, 'index'])
+        ->name('offline-sales.index');
+
+    Route::get('/offline-sales/report', [OfflineSaleController::class, 'report'])
+        ->name('offline-sales.report');
+
+    Route::get('/offline-sales/create', [OfflineSaleController::class, 'create'])
+        ->name('offline-sales.create');
+
+    Route::post('/offline-sales', [OfflineSaleController::class, 'store'])
+        ->name('offline-sales.store');
+
+    Route::get('/offline-sales/{offlineSale}', [OfflineSaleController::class, 'show'])
+        ->name('offline-sales.show');
+
+    Route::post('/offline-sales/{offlineSale}/cancel', [OfflineSaleController::class, 'cancel'])
+        ->name('offline-sales.cancel');
+
+    Route::get('/offline-sales/{offlineSale}/receipt', [OfflineSaleController::class, 'receipt'])
+        ->name('offline-sales.receipt');
+});
 
 
 /*
 |--------------------------------------------------------------------------
-| Admin Category Management
+| Auth Routes
 |--------------------------------------------------------------------------
 */
-
-Route::resource('/admin/categories', CategoryController::class)
-    ->middleware('admin')
-    ->names('admin.categories');
-
-
-/*
-|--------------------------------------------------------------------------
-| Admin Product Management
-|--------------------------------------------------------------------------
-*/
-
-Route::resource('/admin/products', ProductController::class)
-    ->middleware('admin');
-
-
-/*
-|--------------------------------------------------------------------------
-| Admin Product Variant Management
-|--------------------------------------------------------------------------
-*/
-
-Route::resource(
-    '/admin/products/{product}/variants',
-    ProductVariantController::class
-)->middleware('admin');
-
-
-/*
-|--------------------------------------------------------------------------
-| Admin Inventory Management
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/admin/inventory', [InventoryController::class, 'index'])
-    ->middleware('admin')
-    ->name('admin.inventory.index');
-
-Route::put('/admin/inventory/{variant}', [InventoryController::class, 'update'])
-    ->middleware('admin')
-    ->name('admin.inventory.update');
-
-Route::get('/admin/sales-report', [SalesReportController::class, 'index'])
-    ->middleware('admin')
-    ->name('admin.sales-report.index');
-
-
-/*
-|--------------------------------------------------------------------------
-| Admin Order Management
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/admin/orders', [OrderController::class, 'index'])
-    ->middleware('admin')
-    ->name('admin.orders.index');
-
-Route::get('/admin/orders/{orderCode}', [OrderController::class, 'show'])
-    ->middleware('admin')
-    ->name('admin.orders.show');
-
-Route::post('/admin/orders/{orderCode}/approve-payment', [OrderController::class, 'approvePayment'])
-    ->middleware('admin')
-    ->name('admin.orders.approve-payment');
-
-Route::put('/admin/orders/{orderCode}/status', [OrderController::class, 'updateStatus'])
-    ->middleware('admin')
-    ->name('admin.orders.update-status');
-
-
-/*
-|--------------------------------------------------------------------------
-| Admin Offline Sales Management
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/admin/offline-sales', [OfflineSaleController::class, 'index'])
-    ->middleware('admin')
-    ->name('admin.offline-sales.index');
-
-Route::get('/admin/offline-sales/report', [OfflineSaleController::class, 'report'])
-    ->middleware('admin')
-    ->name('admin.offline-sales.report');
-
-Route::get('/admin/offline-sales/create', [OfflineSaleController::class, 'create'])
-    ->middleware('admin')
-    ->name('admin.offline-sales.create');
-
-Route::post('/admin/offline-sales', [OfflineSaleController::class, 'store'])
-    ->middleware('admin')
-    ->name('admin.offline-sales.store');
-
-Route::get('/admin/offline-sales/{offlineSale}', [OfflineSaleController::class, 'show'])
-    ->middleware('admin')
-    ->name('admin.offline-sales.show');
-
-Route::post('/admin/offline-sales/{offlineSale}/cancel', [OfflineSaleController::class, 'cancel'])
-    ->middleware('admin')
-    ->name('admin.offline-sales.cancel');
-
-Route::get('/admin/offline-sales/{offlineSale}/receipt', [OfflineSaleController::class, 'receipt'])
-    ->middleware('admin')
-    ->name('admin.offline-sales.receipt');
-
-
-/*
-|--------------------------------------------------------------------------
-| Breeze & Category Routes
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/category/{slug}', [CategoryProductController::class, 'index'])
-    ->name('category.products');
 
 require __DIR__.'/auth.php';
-
-
-Route::get('/clear-all-cache', function () {
-    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-    return 'All cache cleared successfully!';
-});
-
-Route::get('/run-storage-link', function () {
-    \Illuminate\Support\Facades\Artisan::call('storage:link');
-    return 'Storage linked successfully!';
-});
-
-PHP
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Route;
-
-PHP
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Route;
-
-Route::get('/reset-admin-pass', function () {
-    $admin = DB::table('admins')->first();
-
-    if ($admin) {
-        DB::table('admins')
-            ->where('id', $admin->id)
-            ->update([
-                'email'    => 'admin@gmail.com',
-                'password' => Hash::make('12345678'),
-            ]);
-
-        return "Success! Email: admin@gmail.com | Password: 12345678";
-    }
-
-    DB::table('admins')->insert([
-        'name'       => 'Super Admin',
-        'email'      => 'admin@gmail.com',
-        'password'   => Hash::make('12345678'),
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    return "Created New Admin! Email: admin@gmail.com | Password: 12345678";
-});

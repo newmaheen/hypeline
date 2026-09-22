@@ -3,127 +3,160 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $products = \App\Models\Product::with('category')
-            ->latest()
-            ->get();
+        $query = Product::with(['category', 'variants'])->latest();
 
-        return view('admin.products.index', compact('products'));
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $products = $query->paginate(15)->withQueryString();
+        $categories = Category::all();
+
+        return view('admin.products.index', compact('products', 'categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $categories = \App\Models\Category::where('is_active', true)
-            ->latest()
-            ->get();
-
+        $categories = Category::all();
         return view('admin.products.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:products,slug',
-            'price' => 'required|numeric|min:0',
-            'sale_price' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'is_active' => 'nullable|boolean',
+            'price' => 'required|numeric|min:0',
+            'sale_price' => 'nullable|numeric|min:0|lt:price',
+            'images' => 'required|array|min:3',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'variants' => 'required|array|min:1',
+            'variants.*.size' => 'required|string|max:50',
+            'variants.*.color' => 'required|string|max:50',
+            'variants.*.stock' => 'required|integer|min:0',
+        ], [
+            'images.min' => 'প্রোডাক্টের জন্য কমপক্ষে ৩টি ছবি আপলোড করতে হবে।',
+            'variants.min' => 'কমপক্ষে একটি সাইজ/কালার ভ্যারিয়েন্ট যোগ করতে হবে।',
         ]);
 
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('products', 'public');
-        }
+        DB::transaction(function () use ($request) {
+            // ১. ছবি আপলোড
+            $imagePaths = [];
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $file) {
+                    $imagePaths[] = $file->store('products', 'public');
+                }
+            }
 
-        $validated['is_active'] = $request->has('is_active');
+            // ২. প্রোডাক্ট তৈরি
+            $product = Product::create([
+                'category_id' => $request->category_id,
+                'name' => $request->name,
+                'slug' => Str::slug($request->name) . '-' . Str::lower(Str::random(5)),
+                'description' => $request->description,
+                'price' => $request->price,
+                'sale_price' => $request->sale_price,
+                'images' => $imagePaths,
+                'status' => $request->has('is_active') ? 'active' : 'inactive',
+            ]);
 
-        \App\Models\Product::create($validated);
+            // ৩. ভ্যারিয়েন্ট ও স্টক সেভ
+            foreach ($request->variants as $variantData) {
+                ProductVariant::create([
+                    'product_id' => $product->id,
+                    'size' => $variantData['size'],
+                    'color' => $variantData['color'],
+                    'sku' => $variantData['sku'] ?? (strtoupper(Str::slug($product->name)) . '-' . strtoupper($variantData['size']) . '-' . rand(100, 999)),
+                    'stock' => $variantData['stock'],
+                ]);
+            }
+        });
 
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product created successfully.');
+        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট এবং ভ্যারিয়েন্ট সফলভাবে তৈরি হয়েছে!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Product $product)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $product = \App\Models\Product::findOrFail($id);
-
-        $categories = \App\Models\Category::where('is_active', true)
-            ->latest()
-            ->get();
-
+        $categories = Category::all();
         return view('admin.products.edit', compact('product', 'categories'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Product $product)
     {
-        $product = \App\Models\Product::findOrFail($id);
-
-        $validated = $request->validate([
+        $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:products,slug,' . $product->id,
+            'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'is_active' => 'nullable|boolean',
+            'images' => 'nullable|array|min:3',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('products', 'public');
+        $data = [
+            'category_id' => $request->category_id,
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'sale_price' => $request->sale_price,
+            'status' => $request->status ?? $product->status,
+        ];
+
+        if ($request->hasFile('images')) {
+            if (!empty($product->images) && is_array($product->images)) {
+                foreach ($product->images as $oldImage) {
+                    if (Storage::disk('public')->exists($oldImage)) {
+                        Storage::disk('public')->delete($oldImage);
+                    }
+                }
+            }
+
+            $newPaths = [];
+            foreach ($request->file('images') as $file) {
+                $newPaths[] = $file->store('products', 'public');
+            }
+            $data['images'] = $newPaths;
         }
 
-        $validated['is_active'] = $request->has('is_active');
+        $product->update($data);
 
-        $product->update($validated);
-
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product updated successfully.');
+        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট সফলভাবে আপডেট হয়েছে!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Product $product)
     {
-    $product = \App\Models\Product::findOrFail($id);
+        if (method_exists($product, 'orderItems') && $product->orderItems()->exists()) {
+            return back()->withErrors(['error' => 'এই প্রোডাক্টের অতীত সেলস রেকর্ড আছে, তাই ডিলিট করা যাবে না। স্ট্যাটাস Inactive করুন।']);
+        }
 
-    $product->delete();
+        if (!empty($product->images) && is_array($product->images)) {
+            foreach ($product->images as $image) {
+                if (Storage::disk('public')->exists($image)) {
+                    Storage::disk('public')->delete($image);
+                }
+            }
+        }
 
-    return redirect()
-        ->route('products.index')
-        ->with('success', 'Product deleted successfully.');
+        $product->variants()->delete();
+        $product->delete();
+
+        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট মুছে ফেলা হয়েছে!');
     }
 }

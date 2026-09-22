@@ -1,14 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Hypeline | Quality. Style. Trust.</title>
 
@@ -22,6 +19,7 @@
             margin: 0;
             background: #fff;
             color: #111;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         /* HERO */
@@ -267,24 +265,96 @@
         }
 
 
-        /* FOOTER */
+        /* FOOTER (PURE CSS - NO BOOTSTRAP NEEDED) */
 
-        .hypeline-footer {
-            background: #111;
-            border-top: 1px solid #333;
+        .site-footer {
+            background: #0d0d0d;
+            border-top: 1px solid #222;
             color: #aaa;
-            padding: 25px;
+            padding: 70px 0 30px;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 25px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1.2fr 1.5fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .footer-brand {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+            margin: 0 0 15px;
+        }
+
+        .footer-text {
+            font-size: 14px;
+            line-height: 1.7;
+            color: #888;
+            margin: 0;
+            max-width: 320px;
+        }
+
+        .footer-title {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #fff;
+            margin: 0 0 20px;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .footer-links a {
+            color: #888;
+            text-decoration: none;
+            transition: .2s;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+            padding-left: 3px;
+        }
+
+        .footer-contact-item {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .footer-divider {
+            border: 0;
+            border-top: 1px solid #222;
+            margin-bottom: 25px;
+        }
+
+        .footer-bottom {
             text-align: center;
             font-size: 13px;
-        }
-
-        .hypeline-footer strong {
-            color: #fff;
-            letter-spacing: 2px;
+            color: #666;
         }
 
 
-        /* MOBILE */
+        /* RESPONSIVE */
 
         @media (max-width: 991px) {
 
@@ -298,6 +368,11 @@
 
             .product-image-box {
                 height: 280px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
             }
 
         }
@@ -364,6 +439,15 @@
                 font-size: 32px;
             }
 
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 35px;
+            }
+
+            .footer-text {
+                max-width: 100%;
+            }
+
         }
 
     </style>
@@ -374,7 +458,7 @@
 <body>
 
 
-{{-- EXISTING NAVBAR — UNCHANGED --}}
+{{-- EXISTING NAVBAR --}}
 
 @include('layouts.navigation')
 
@@ -429,73 +513,62 @@
         Latest Collection
     </h2>
 
-
     @if($products->count())
 
         <div class="products-grid">
 
             @foreach($products as $product)
 
+                @php
+                    $images = [];
+                    if (!empty($product->images)) {
+                        $images = is_array($product->images) ? $product->images : json_decode($product->images, true);
+                    }
+                    $displayImage = (!empty($images) && isset($images[0])) ? $images[0] : $product->image;
+                @endphp
+
                 <div class="product-card">
 
-
                     {{-- IMAGE --}}
-
                     <div class="product-image-box">
 
-                        @if($product->image)
-
+                        @if($displayImage)
                             <img
-                                src="{{ asset('storage/' . $product->image) }}"
+                                src="{{ asset('storage/' . $displayImage) }}"
                                 alt="{{ $product->name }}"
                                 class="product-image"
                             >
-
                         @else
-
                             <div class="no-image">
                                 No Image
                             </div>
-
                         @endif
 
                     </div>
 
-
                     {{-- INFO --}}
-
                     <div class="product-info">
 
                         <div class="product-category">
                             {{ $product->category->name ?? 'Collection' }}
                         </div>
 
-
                         <div class="product-name">
                             {{ $product->name }}
                         </div>
 
-
                         @if($product->sale_price)
-
                             <div class="price">
-
                                 <span class="old-price">
                                     ৳{{ number_format($product->price, 0) }}
                                 </span>
-
                                 ৳{{ number_format($product->sale_price, 0) }}
-
                             </div>
-
                         @else
-
                             <div class="price">
                                 ৳{{ number_format($product->price, 0) }}
                             </div>
-
                         @endif
-
 
                         <a
                             href="{{ route('products.show', $product->slug) }}"
@@ -515,15 +588,8 @@
     @else
 
         <div class="text-center py-5">
-
-            <h4>
-                No products available
-            </h4>
-
-            <p class="text-muted">
-                New products are coming soon.
-            </p>
-
+            <h4>No products available</h4>
+            <p class="text-muted">New products are coming soon.</p>
         </div>
 
     @endif
@@ -639,22 +705,57 @@
 
 
 
-{{-- FOOTER --}}
+{{-- CLEAN HYPELINE FOOTER --}}
 
-<footer class="hypeline-footer">
+<footer class="site-footer">
 
-    <strong>HYPELINE</strong>
+    <div class="footer-container">
 
-    <span>
-        &nbsp; Quality. Style. Trust.
-    </span>
+        <div class="footer-grid">
 
-    <br><br>
+            <div>
+                <h4 class="footer-brand">HYPELINE</h4>
+                <p class="footer-text">
+                    Your Premium Fashion Store. Top-quality jerseys and fashion apparel with authentic designs and dependable delivery across Bangladesh.
+                </p>
+            </div>
 
-    © {{ date('Y') }} Hypeline. All rights reserved.
+            <div>
+                <h5 class="footer-title">Quick Links</h5>
+                <ul class="footer-links">
+                    <li><a href="{{ route('home') }}">Home</a></li>
+                    <li><a href="{{ route('cart.index') }}">Cart</a></li>
+                    <li><a href="{{ route('dashboard') }}">My Account</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h5 class="footer-title">Customer Care</h5>
+                <ul class="footer-links">
+                    <li><a href="javascript:void(0)">Delivery Information</a></li>
+                    <li><a href="javascript:void(0)">Return & Exchange</a></li>
+                    <li><a href="javascript:void(0)">Terms & Conditions</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h5 class="footer-title">Contact Us</h5>
+                <span class="footer-contact-item">📍 Dhaka, Bangladesh</span>
+                <span class="footer-contact-item">📞 +880 1XXXXXXXXX</span>
+                <span class="footer-contact-item">✉️ support@hypeline.com</span>
+            </div>
+
+        </div>
+
+        <hr class="footer-divider">
+
+        <div class="footer-bottom">
+            © {{ date('Y') }} <strong>HYPELINE</strong>. All rights reserved.
+        </div>
+
+    </div>
 
 </footer>
-
 
 </body>
 

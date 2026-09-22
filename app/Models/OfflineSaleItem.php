@@ -14,6 +14,7 @@ class OfflineSaleItem extends Model
         'variant_name',
         'quantity',
         'unit_price',
+        'price', 
         'subtotal',
     ];
 

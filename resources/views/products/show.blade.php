@@ -1,31 +1,25 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <title>{{ $product->name }} - Hypeline</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-
         body {
             background: #f8f8f8;
             color: #111;
         }
 
         /* Product Page */
-
         .product-page {
             padding: 50px 0 80px;
         }
 
         /* Product Container */
-
         .product-container {
             max-width: 1200px;
             width: 100%;
@@ -35,40 +29,54 @@
             padding-right: 15px;
         }
 
-        /* Product Image */
-
+        /* Product Image Box & Auto Zoom */
         .product-image-box {
             background: #fff;
             border-radius: 14px;
             overflow: hidden;
             border: 1px solid #eee;
+            position: relative;
+            cursor: crosshair;
+            height: 560px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .product-image-box img {
             width: 100%;
-            height: 560px;
+            height: 100%;
             object-fit: contain;
             display: block;
+            pointer-events: none;
+            transition: transform 0.15s ease-out;
+            transform-origin: center center;
         }
 
         /* Thumbnails */
-
         .product-thumbnails {
             display: flex;
             gap: 10px;
-            margin-top: 12px;
+            margin-top: 14px;
             overflow-x: auto;
+            padding-bottom: 4px;
         }
 
         .product-thumbnail {
-            width: 75px;
-            height: 75px;
-            border: 1px solid #ddd;
+            width: 80px;
+            height: 80px;
+            border: 2px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
             flex-shrink: 0;
             cursor: pointer;
             background: #fff;
+            transition: border-color 0.2s ease;
+        }
+
+        .product-thumbnail:hover,
+        .product-thumbnail.active {
+            border-color: #111;
         }
 
         .product-thumbnail img {
@@ -78,7 +86,6 @@
         }
 
         /* Product Information */
-
         .product-info-wrapper {
             max-width: 480px;
             margin: 0 auto;
@@ -119,7 +126,6 @@
         }
 
         /* Options */
-
         .option-title {
             font-size: 14px;
             font-weight: 700;
@@ -165,7 +171,6 @@
         }
 
         /* Stock */
-
         .stock-message {
             font-size: 14px;
             margin-top: -10px;
@@ -174,7 +179,6 @@
         }
 
         /* Quantity */
-
         .quantity-wrapper {
             display: flex;
             align-items: center;
@@ -210,7 +214,6 @@
         }
 
         /* Add To Cart */
-
         .add-cart-button {
             width: 100%;
             margin-top: 25px;
@@ -235,7 +238,6 @@
         }
 
         /* Back Link */
-
         .back-link {
             display: inline-block;
             margin-top: 25px;
@@ -250,15 +252,14 @@
         }
 
         /* Mobile */
-
         @media (max-width: 767px) {
-
             .product-page {
                 padding: 25px 0 50px;
             }
 
-            .product-image-box img {
+            .product-image-box {
                 height: 380px;
+                cursor: default;
             }
 
             .product-title {
@@ -277,659 +278,318 @@
             .product-info-wrapper {
                 max-width: 100%;
             }
-
         }
-
     </style>
-
 </head>
-
 
 <body>
 
     @include('layouts.navigation')
 
-
     <div class="product-page">
-
         <div class="product-container">
 
             {{-- Success Message --}}
-
             @if(session('success'))
-
                 <div class="alert alert-success mb-4">
-
-                    <div class="fw-semibold mb-3">
-                        {{ session('success') }}
-                    </div>
-
+                    <div class="fw-semibold mb-3">{{ session('success') }}</div>
                     <div class="d-flex flex-wrap gap-2">
-
-                        <a
-                            href="{{ route('cart.index') }}"
-                            class="btn btn-dark"
-                        >
-                            VIEW CART
-                        </a>
-
-                        <a
-                            href="{{ route('checkout.index') }}"
-                            class="btn btn-outline-dark"
-                        >
-                            PROCEED TO CHECKOUT
-                        </a>
-
+                        <a href="{{ route('cart.index') }}" class="btn btn-dark">VIEW CART</a>
+                        <a href="{{ route('checkout.index') }}" class="btn btn-outline-dark">PROCEED TO CHECKOUT</a>
                     </div>
-
                 </div>
-
             @endif
-
 
             {{-- Error Messages --}}
-
             @if($errors->any())
-
                 <div class="alert alert-danger mb-4">
-
                     <ul class="mb-0">
-
                         @foreach($errors->all() as $error)
-
-                            <li>
-                                {{ $error }}
-                            </li>
-
+                            <li>{{ $error }}</li>
                         @endforeach
-
                     </ul>
-
                 </div>
-
             @endif
 
+            @php
+                $allImages = [];
+                if (!empty($product->images) && is_array($product->images)) {
+                    $allImages =$product->images;
+                } elseif (!empty($product->images) && is_string($product->images)) {
+                    $decoded = json_decode($product->images, true);
+                    $allImages = is_array($decoded) ? $decoded : [$product->images];
+                } elseif (!empty($product->image)) {
+                    $allImages[] =$product->image;
+                }
+                $firstImage = count($allImages) > 0 ? asset('storage/' . $allImages[0]) : null;
+            @endphp
 
             <div class="row g-5 align-items-center justify-content-center">
 
-
-                {{-- PRODUCT IMAGE --}}
-
+                {{-- PRODUCT IMAGE & AUTO ZOOM --}}
                 <div class="col-12 col-lg-6">
-
-                    <div class="product-image-box">
-
-                        @if($product->image)
-
-                            <img
-                                id="mainProductImage"
-                                src="{{ asset('storage/' . $product->image) }}"
-                                alt="{{ $product->name }}"
-                            >
-
+                    <div class="product-image-box" id="productImageBox">
+                        @if($firstImage)
+                            <img id="mainProductImage" src="{{ $firstImage }}" alt="{{ $product->name }}">
                         @else
-
-                            <div
-                                class="d-flex align-items-center justify-content-center"
-                                style="height:560px;"
-                            >
-
-                                <span class="text-muted">
-                                    No Image Available
-                                </span>
-
+                            <div class="d-flex align-items-center justify-content-center w-100 h-100">
+                                <span class="text-muted">No Image Available</span>
                             </div>
-
                         @endif
-
                     </div>
-
 
                     {{-- Gallery Thumbnails --}}
-
-                    <div class="product-thumbnails">
-
-                        @if($product->image)
-
-                            <div
-                                class="product-thumbnail"
-                                onclick="changeMainImage('{{ asset('storage/' . $product->image) }}')"
-                            >
-
-                                <img
-                                    src="{{ asset('storage/' . $product->image) }}"
-                                    alt="{{ $product->name }}"
-                                >
-
-                            </div>
-
-                        @endif
-
-                    </div>
-
+                    @if(count($allImages) > 1)
+                        <div class="product-thumbnails">
+                            @foreach($allImages as $index =>$img)
+                                <div class="product-thumbnail {{ $index === 0 ? 'active' : '' }}" 
+                                     onclick="changeMainImage('{{ asset('storage/' . $img) }}', this)">
+                                    <img src="{{ asset('storage/' . $img) }}" alt="{{ $product->name }}">
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
-
                 {{-- PRODUCT INFORMATION --}}
-
                 <div class="col-12 col-lg-6">
-
                     <div class="product-info-wrapper">
 
-
                         {{-- Category --}}
-
                         <div class="product-category">
-
                             {{ $product->category->name ?? 'Collection' }}
-
                         </div>
-
 
                         {{-- Product Name --}}
-
-                        <h1 class="product-title">
-
-                            {{ $product->name }}
-
-                        </h1>
-
+                        <h1 class="product-title">{{ $product->name }}</h1>
 
                         {{-- Price --}}
-
                         <div class="mb-3">
-
                             @if($product->sale_price)
-
-                                <span class="product-price">
-
-                                    ৳{{ number_format($product->sale_price, 0) }}
-
-                                </span>
-
-                                <span class="old-price">
-
-                                    ৳{{ number_format($product->price, 0) }}
-
-                                </span>
-
+                                <span class="product-price">৳{{ number_format($product->sale_price, 0) }}</span>
+                                <span class="old-price">৳{{ number_format($product->price, 0) }}</span>
                             @else
-
-                                <span class="product-price">
-
-                                    ৳{{ number_format($product->price, 0) }}
-
-                                </span>
-
+                                <span class="product-price">৳{{ number_format($product->price, 0) }}</span>
                             @endif
-
                         </div>
 
-
                         {{-- Description --}}
-
                         @if($product->description)
-
                             <div class="product-description">
-
                                 {{ $product->description }}
-
                             </div>
-
                         @endif
 
-
-                        <form
-                            method="POST"
-                            action="{{ route('cart.add', $product->id) }}"
-                            id="cartForm"
-                        >
-
+                        <form method="POST" action="{{ route('cart.add', $product->id) }}" id="cartForm">
                             @csrf
 
-
                             {{-- Hidden Variant ID --}}
-
-                            <input
-                                type="hidden"
-                                name="variant_id"
-                                id="variant_id"
-                            >
-
+                            <input type="hidden" name="variant_id" id="variant_id">
 
                             {{-- SIZE --}}
-
                             @php
-
-                                $sizes = $product->variants
-                                    ->where('is_active', true)
+                                $sizes =$product->variants
                                     ->pluck('size')
                                     ->filter()
                                     ->unique()
                                     ->values();
-
                             @endphp
 
-
                             @if($sizes->count())
-
                                 <div>
-
-                                    <div class="option-title">
-                                        Select Size
-                                    </div>
-
+                                    <div class="option-title">Select Size</div>
                                     <div class="option-buttons">
-
                                         @foreach($sizes as $size)
-
-                                            <button
-                                                type="button"
-                                                class="option-button size-button"
-                                                data-size="{{ $size }}"
-                                            >
+                                            <button type="button" class="option-button size-button" data-size="{{ $size }}">
                                                 {{ $size }}
                                             </button>
-
                                         @endforeach
-
                                     </div>
-
                                 </div>
-
                             @endif
 
-
                             {{-- COLOR --}}
-
                             @php
-
-                                $colors = $product->variants
-                                    ->where('is_active', true)
+                                $colors =$product->variants
                                     ->pluck('color')
                                     ->filter()
                                     ->unique()
                                     ->values();
-
                             @endphp
 
-
                             @if($colors->count())
-
                                 <div>
-
-                                    <div class="option-title">
-                                        Select Color
-                                    </div>
-
+                                    <div class="option-title">Select Color</div>
                                     <div class="option-buttons">
-
                                         @foreach($colors as $color)
-
-                                            <button
-                                                type="button"
-                                                class="option-button color-button"
-                                                data-color="{{ $color }}"
-                                            >
+                                            <button type="button" class="option-button color-button" data-color="{{ $color }}">
                                                 {{ $color }}
                                             </button>
-
                                         @endforeach
-
                                     </div>
-
                                 </div>
-
                             @endif
 
-
                             {{-- STOCK --}}
-
-                            <div
-                                id="stockMessage"
-                                class="stock-message"
-                            >
+                            <div id="stockMessage" class="stock-message">
                                 Please select your options.
                             </div>
 
-
                             {{-- QUANTITY --}}
-
-                            <div class="option-title">
-                                Quantity
-                            </div>
-
+                            <div class="option-title">Quantity</div>
                             <div class="quantity-wrapper">
-
-                                <button
-                                    type="button"
-                                    class="quantity-button"
-                                    id="decreaseQuantity"
-                                >
-                                    −
-                                </button>
-
-                                <input
-                                    type="number"
-                                    name="quantity"
-                                    id="quantity"
-                                    class="quantity-input"
-                                    value="1"
-                                    min="1"
-                                    disabled
-                                >
-
-                                <button
-                                    type="button"
-                                    class="quantity-button"
-                                    id="increaseQuantity"
-                                >
-                                    +
-                                </button>
-
+                                <button type="button" class="quantity-button" id="decreaseQuantity">−</button>
+                                <input type="number" name="quantity" id="quantity" class="quantity-input" value="1" min="1" readonly>
+                                <button type="button" class="quantity-button" id="increaseQuantity">+</button>
                             </div>
-
 
                             {{-- ADD TO CART --}}
-
-                            <button
-                                type="submit"
-                                id="addToCartButton"
-                                class="add-cart-button"
-                                disabled
-                            >
+                            <button type="submit" id="addToCartButton" class="add-cart-button" disabled>
                                 ADD TO CART
                             </button>
 
-
                         </form>
 
-
                         {{-- Continue Shopping --}}
-
-                        <a
-                            href="{{ route('home') }}"
-                            class="back-link"
-                        >
+                        <a href="{{ route('home') }}" class="back-link">
                             ← Continue Shopping
                         </a>
 
-
                     </div>
-
                 </div>
 
             </div>
-
         </div>
-
     </div>
-
 
     @include('layouts.footer')
 
-
     <script>
+        /* === MOUSE HOVER AUTO ZOOM SCRIPT === */
+        const imageBox = document.getElementById('productImageBox');
+        const mainImage = document.getElementById('mainProductImage');
 
-        const variants = @json(
-            $product->variants
-                ->where('is_active', true)
-                ->values()
-        );
+        if (imageBox && mainImage) {
+            imageBox.addEventListener('mousemove', function(e) {
+                if (window.innerWidth < 768) return;
+
+                const rect = imageBox.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+                mainImage.style.transformOrigin = `${x}% ${y}%`;
+                mainImage.style.transform = 'scale(2.2)';
+            });
+
+            imageBox.addEventListener('mouseleave', function() {
+                mainImage.style.transform = 'scale(1)';
+                mainImage.style.transformOrigin = 'center center';
+            });
+        }
+
+        /* === CHANGE MAIN IMAGE FROM THUMBNAILS === */
+        function changeMainImage(imageUrl, element) {
+            if (mainImage) {
+                mainImage.src = imageUrl;
+            }
+            document.querySelectorAll('.product-thumbnail').forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            if (element) {
+                element.classList.add('active');
+            }
+        }
+
+        /* === VARIANT & CART SCRIPT === */
+        const variants = @json($product->variants->values());
 
         let selectedSize = null;
         let selectedColor = null;
         let selectedVariant = null;
 
-
-        const sizeButtons =
-            document.querySelectorAll('.size-button');
-
-        const colorButtons =
-            document.querySelectorAll('.color-button');
-
-        const variantInput =
-            document.getElementById('variant_id');
-
-        const quantityInput =
-            document.getElementById('quantity');
-
-        const stockMessage =
-            document.getElementById('stockMessage');
-
-        const addToCartButton =
-            document.getElementById('addToCartButton');
-
+        const sizeButtons = document.querySelectorAll('.size-button');
+        const colorButtons = document.querySelectorAll('.color-button');
+        const variantInput = document.getElementById('variant_id');
+        const quantityInput = document.getElementById('quantity');
+        const stockMessage = document.getElementById('stockMessage');
+        const addToCartButton = document.getElementById('addToCartButton');
 
         /* SIZE BUTTON */
-
         sizeButtons.forEach(button => {
-
             button.addEventListener('click', function () {
-
-                if (this.classList.contains('disabled')) {
-                    return;
-                }
-
-                sizeButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                });
-
+                if (this.classList.contains('disabled')) return;
+                sizeButtons.forEach(btn => btn.classList.remove('active'));
                 this.classList.add('active');
-
                 selectedSize = this.dataset.size;
-
                 findVariant();
-
             });
-
         });
-
 
         /* COLOR BUTTON */
-
         colorButtons.forEach(button => {
-
             button.addEventListener('click', function () {
-
-                if (this.classList.contains('disabled')) {
-                    return;
-                }
-
-                colorButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                });
-
+                if (this.classList.contains('disabled')) return;
+                colorButtons.forEach(btn => btn.classList.remove('active'));
                 this.classList.add('active');
-
                 selectedColor = this.dataset.color;
-
                 findVariant();
-
             });
-
         });
-
 
         /* FIND MATCHING VARIANT */
-
         function findVariant() {
+            // যদি সাইজ ও কালার অপশন না থাকে (সিম্পল প্রোডাক্ট)
+            if (variants.length === 0) {
+                addToCartButton.disabled = false;
+                stockMessage.innerText = '';
+                return;
+            }
 
             selectedVariant = variants.find(variant => {
-
-                const sizeMatch =
-                    !selectedSize ||
-                    variant.size === selectedSize;
-
-                const colorMatch =
-                    !selectedColor ||
-                    variant.color === selectedColor;
-
+                const sizeMatch = !selectedSize || variant.size === selectedSize;
+                const colorMatch = !selectedColor || variant.color === selectedColor;
                 return sizeMatch && colorMatch;
-
             });
 
-
-            /* No valid variant */
-
             if (!selectedVariant) {
-
                 variantInput.value = '';
-
-                quantityInput.disabled = true;
-
                 addToCartButton.disabled = true;
-
-                stockMessage.innerText =
-                    'Please select a valid combination.';
-
+                stockMessage.innerText = 'Please select a valid combination.';
                 return;
-
             }
-
-
-            /* Out of stock */
 
             if (selectedVariant.stock <= 0) {
-
                 variantInput.value = '';
-
-                quantityInput.disabled = true;
-
                 addToCartButton.disabled = true;
-
-                stockMessage.innerText =
-                    'Out of stock.';
-
+                stockMessage.innerText = 'Out of stock.';
                 return;
-
             }
 
-
-            /* Valid variant */
-
-            variantInput.value =
-                selectedVariant.id;
-
-            quantityInput.disabled = false;
-
+            variantInput.value = selectedVariant.id;
             addToCartButton.disabled = false;
-
-            quantityInput.max =
-                selectedVariant.stock;
-
+            quantityInput.max = selectedVariant.stock;
             quantityInput.value = 1;
-
-            stockMessage.innerText =
-                'Available stock: ' +
-                selectedVariant.stock;
-
+            stockMessage.innerText = 'Available stock: ' + selectedVariant.stock;
         }
 
-
-        /* QUANTITY + */
-
-        document
-            .getElementById('increaseQuantity')
-            .addEventListener('click', function () {
-
-                if (!selectedVariant) {
-                    return;
-                }
-
-                let quantity =
-                    parseInt(quantityInput.value);
-
-                const max =
-                    selectedVariant.stock;
-
-                if (quantity < max) {
-
-                    quantity++;
-
-                    quantityInput.value =
-                        quantity;
-
-                }
-
-            });
-
-
-        /* QUANTITY - */
-
-        document
-            .getElementById('decreaseQuantity')
-            .addEventListener('click', function () {
-
-                let quantity =
-                    parseInt(quantityInput.value);
-
-                if (quantity > 1) {
-
-                    quantity--;
-
-                    quantityInput.value =
-                        quantity;
-
-                }
-
-            });
-
-
-        /* MANUAL QUANTITY INPUT */
-
-        quantityInput.addEventListener('input', function () {
-
-            if (!selectedVariant) {
-                return;
+        /* QUANTITY BUTTONS */
+        document.getElementById('increaseQuantity').addEventListener('click', function () {
+            let max = selectedVariant ? selectedVariant.stock : 100;
+            let quantity = parseInt(quantityInput.value) || 1;
+            if (quantity < max) {
+                quantity++;
+                quantityInput.value = quantity;
             }
-
-            let quantity =
-                parseInt(this.value);
-
-            const max =
-                selectedVariant.stock;
-
-
-            if (!quantity || quantity < 1) {
-
-                this.value = 1;
-
-                return;
-
-            }
-
-
-            if (quantity > max) {
-
-                this.value = max;
-
-            }
-
         });
 
-
-        /* MAIN IMAGE */
-
-        function changeMainImage(imageUrl) {
-
-            const mainImage =
-                document.getElementById(
-                    'mainProductImage'
-                );
-
-            if (mainImage) {
-
-                mainImage.src =
-                    imageUrl;
-
+        document.getElementById('decreaseQuantity').addEventListener('click', function () {
+            let quantity = parseInt(quantityInput.value) || 1;
+            if (quantity > 1) {
+                quantity--;
+                quantityInput.value = quantity;
             }
-
-        }
-
+        });
     </script>
 
-
 </body>
-
 </html>

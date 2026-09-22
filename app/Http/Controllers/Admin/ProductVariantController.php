@@ -37,23 +37,25 @@ class ProductVariantController extends Controller
         ProductVariant::create($validated);
 
         return redirect()
-            ->route('variants.index', $product->id)
+            ->route('admin.variants.index', $product->id)
             ->with('success', 'Variant created successfully.');
     }
 
     public function edit(Product $product, ProductVariant $variant)
     {
         if ($variant->product_id !== $product->id) {
-        abort(404);
-}
+            abort(404);
+        }
+
         return view('admin.products.variants.edit', compact('product', 'variant'));
     }
+
     public function update(Request $request, Product $product, ProductVariant $variant)
     {
-
         if ($variant->product_id !== $product->id) {
-                abort(404);
-            }
+            abort(404);
+        }
+
         $validated = $request->validate([
             'size' => 'nullable|string|max:50',
             'color' => 'nullable|string|max:100',
@@ -67,20 +69,20 @@ class ProductVariantController extends Controller
         $variant->update($validated);
 
         return redirect()
-            ->route('variants.index', $product->id)
+            ->route('admin.variants.index', $product->id)
             ->with('success', 'Variant updated successfully.');
     }
+
     public function destroy(Product $product, ProductVariant $variant)
     {
         if ($variant->product_id !== $product->id) {
-                abort(404);
-            }
+            abort(404);
+        }
+
         $variant->delete();
 
         return redirect()
-            ->route('variants.index', $product->id)
+            ->route('admin.variants.index', $product->id)
             ->with('success', 'Variant deleted successfully.');
     }
-
-
 }

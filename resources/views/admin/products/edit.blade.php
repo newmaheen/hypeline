@@ -1,427 +1,148 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Product - Hypeline Admin</title>
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
 </head>
-
 <body class="bg-light">
 
     {{-- Admin Header --}}
-
     <nav class="navbar navbar-dark bg-dark shadow-sm">
-
         <div class="container-fluid px-4">
-
-            <a
-                href="{{ route('admin.dashboard') }}"
-                class="navbar-brand fw-bold"
-            >
-                HYPELINE ADMIN
-            </a>
-
-            <a
-                href="{{ route('products.index') }}"
-                class="btn btn-outline-light btn-sm"
-            >
-                ← Products
-            </a>
-
+            <a href="{{ route('admin.dashboard') }}" class="navbar-brand fw-bold">HYPELINE ADMIN</a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-light btn-sm">← Dashboard</a>
+                <a href="{{ route('admin.products.index') }}" class="btn btn-outline-light btn-sm">← Products</a>
+            </div>
         </div>
-
     </nav>
 
-
-    {{-- Main Content --}}
-
-    <div class="container py-5">
-
+    <div class="container py-4">
         <div class="row justify-content-center">
-
-            <div class="col-12 col-lg-8">
-
-                {{-- Heading --}}
+            <div class="col-12 col-xl-10">
 
                 <div class="mb-4">
-
-                    <h1 class="fw-bold mb-1">
-                        Edit Product
-                    </h1>
-
-                    <p class="text-muted mb-0">
-                        Update product information for
-                        <strong class="text-dark">
-                            {{ $product->name }}
-                        </strong>
-                    </p>
-
+                    <h2 class="fw-bold mb-1">Edit Product</h2>
+                    <p class="text-muted mb-0">Update product details, pricing, and images.</p>
                 </div>
 
-
-                {{-- Validation Errors --}}
-
-                @if($errors->any())
-
-                    <div class="alert alert-danger">
-
-                        <strong>
-                            Please fix the following errors:
-                        </strong>
-
+                @if ($errors->any())
+                    <div class="alert alert-danger alert-dismissible fade show mb-4">
+                        <strong>Please resolve the following errors:</strong>
                         <ul class="mb-0 mt-2">
-
-                            @foreach($errors->all() as $error)
-
-                                <li>
-                                    {{ $error }}
-                                </li>
-
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
                             @endforeach
-
                         </ul>
-
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-
                 @endif
 
+                <form method="POST" action="{{ route('admin.products.update', $product->id) }}" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
 
-                {{-- Product Form --}}
-
-                <div class="card border-0 shadow-sm">
-
-                    <div class="card-body p-4 p-md-5">
-
-                        <form
-                            method="POST"
-                            action="{{ route('products.update', $product->id) }}"
-                            enctype="multipart/form-data"
-                        >
-
-                            @csrf
-
-                            @method('PUT')
-
-
-                            {{-- Category --}}
-
-                            <div class="mb-4">
-
-                                <label
-                                    for="category_id"
-                                    class="form-label fw-semibold"
-                                >
-                                    Category
-                                </label>
-
-                                <select
-                                    name="category_id"
-                                    id="category_id"
-                                    class="form-select"
-                                    required
-                                >
-
-                                    <option value="">
-                                        Select Category
-                                    </option>
-
-                                    @foreach($categories as $category)
-
-                                        <option
-                                            value="{{ $category->id }}"
-                                            {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}
-                                        >
-                                            {{ $category->name }}
-                                        </option>
-
-                                    @endforeach
-
-                                </select>
-
-                            </div>
-
-
-                            {{-- Product Name --}}
-
-                            <div class="mb-4">
-
-                                <label
-                                    for="name"
-                                    class="form-label fw-semibold"
-                                >
-                                    Product Name
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="name"
-                                    id="name"
-                                    value="{{ old('name', $product->name) }}"
-                                    class="form-control"
-                                    required
-                                >
-
-                            </div>
-
-
-                            {{-- Slug --}}
-
-                            <div class="mb-4">
-
-                                <label
-                                    for="slug"
-                                    class="form-label fw-semibold"
-                                >
-                                    Slug
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="slug"
-                                    id="slug"
-                                    value="{{ old('slug', $product->slug) }}"
-                                    class="form-control"
-                                    required
-                                >
-
-                                <div class="form-text">
-                                    Use a unique, URL-friendly slug.
-                                </div>
-
-                            </div>
-
-
-                            {{-- Price Row --}}
-
-                            <div class="row g-3 mb-4">
-
-                                <div class="col-12 col-md-6">
-
-                                    <label
-                                        for="price"
-                                        class="form-label fw-semibold"
-                                    >
-                                        Price
-                                    </label>
-
-                                    <div class="input-group">
-
-                                        <span class="input-group-text">
-                                            ৳
-                                        </span>
-
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            name="price"
-                                            id="price"
-                                            value="{{ old('price', $product->price) }}"
-                                            class="form-control"
-                                            min="0"
-                                            required
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="col-12 col-md-6">
-
-                                    <label
-                                        for="sale_price"
-                                        class="form-label fw-semibold"
-                                    >
-                                        Sale Price
-                                    </label>
-
-                                    <div class="input-group">
-
-                                        <span class="input-group-text">
-                                            ৳
-                                        </span>
-
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            name="sale_price"
-                                            id="sale_price"
-                                            value="{{ old('sale_price', $product->sale_price) }}"
-                                            class="form-control"
-                                            min="0"
-                                            placeholder="Optional"
-                                        >
-
-                                    </div>
-
-                                    <div class="form-text">
-                                        Leave empty if there is no sale price.
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            {{-- Description --}}
-
-                            <div class="mb-4">
-
-                                <label
-                                    for="description"
-                                    class="form-label fw-semibold"
-                                >
-                                    Description
-                                </label>
-
-                                <textarea
-                                    name="description"
-                                    id="description"
-                                    rows="5"
-                                    class="form-control"
-                                    placeholder="Write a short product description..."
-                                >{{ old('description', $product->description) }}</textarea>
-
-                            </div>
-
-
-                            {{-- Current Image --}}
-
-                            <div class="mb-4">
-
-                                <label class="form-label fw-semibold">
-                                    Current Product Image
-                                </label>
-
-                                @if($product->image)
+                    <div class="row g-4">
+                        {{-- Basic Info --}}
+                        <div class="col-12 col-lg-7">
+                            <div class="card border-0 shadow-sm mb-4">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold mb-3">Basic Information</h5>
 
                                     <div class="mb-3">
-
-                                        <img
-                                            src="{{ asset('storage/' . $product->image) }}"
-                                            alt="{{ $product->name }}"
-                                            class="img-thumbnail"
-                                            style="width: 140px; height: 140px; object-fit: cover;"
-                                        >
-
+                                        <label for="name" class="form-label fw-semibold">Product Name</label>
+                                        <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $product->name) }}" required>
                                     </div>
 
-                                @else
+                                    <div class="mb-3">
+                                        <label for="category_id" class="form-label fw-semibold">Category</label>
+                                        <select name="category_id" id="category_id" class="form-select" required>
+                                            <option value="">Select Category</option>
+                                            @if (isset($categories))
+                                                @foreach ($categories as $category)
+                                                    <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
+                                                        {{ $category->name }}
+                                                    </option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
 
-                                    <p class="text-muted">
-                                        No product image uploaded.
-                                    </p>
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-12 col-md-6">
+                                            <label for="price" class="form-label fw-semibold">Regular Price (৳)</label>
+                                            <input type="number" step="0.01" name="price" id="price" class="form-control" value="{{ old('price', $product->price) }}" required>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label for="sale_price" class="form-label fw-semibold">Sale Price (৳) <small class="text-muted">(Optional)</small></label>
+                                            <input type="number" step="0.01" name="sale_price" id="sale_price" class="form-control" value="{{ old('sale_price', $product->sale_price) }}">
+                                        </div>
+                                    </div>
 
-                                @endif
-
-
-                                <label
-                                    for="image"
-                                    class="form-label fw-semibold"
-                                >
-                                    Replace Image
-                                </label>
-
-                                <input
-                                    type="file"
-                                    name="image"
-                                    id="image"
-                                    class="form-control"
-                                    accept="image/*"
-                                >
-
-                                <div class="form-text">
-                                    JPEG, PNG, JPG or WEBP. Maximum size: 2MB.
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label fw-semibold">Description</label>
+                                        <textarea name="description" id="description" rows="4" class="form-control">{{ old('description', $product->description) }}</textarea>
+                                    </div>
                                 </div>
-
                             </div>
+                        </div>
 
+                        {{-- Images & Status --}}
+                        <div class="col-12 col-lg-5">
+                            <div class="card border-0 shadow-sm mb-4">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold mb-3">Current Images</h5>
 
-                            {{-- Active --}}
+                                    {{-- Existing Images Preview --}}
+                                    @if (!empty($product->images) && is_array($product->images))
+                                        <div class="d-flex flex-wrap gap-2 mb-3">
+                                            @foreach ($product->images as $img)
+                                                <div class="border rounded p-1 bg-white">
+                                                    <img src="{{ asset('storage/' . $img) }}" alt="Preview" width="70" height="70" class="rounded" style="object-fit: cover;">
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <p class="text-muted small mb-3">No images uploaded yet.</p>
+                                    @endif
 
-                            <div class="form-check mb-4">
+                                    <div class="mb-3">
+                                        <label for="images" class="form-label fw-semibold">Replace Images</label>
+                                        <input type="file" name="images[]" id="images" class="form-control" multiple accept="image/*">
+                                        <small class="text-muted d-block mt-1">If you upload new images, all existing images will be replaced. (Minimum 3 images)</small>
+                                    </div>
 
-                                <input
-                                    type="checkbox"
-                                    name="is_active"
-                                    value="1"
-                                    id="is_active"
-                                    class="form-check-input"
-                                    {{ old('is_active', $product->is_active) ? 'checked' : '' }}
-                                >
+                                    <hr>
 
-                                <label
-                                    for="is_active"
-                                    class="form-check-label fw-semibold"
-                                >
-                                    Active
-                                </label>
+                                    <h5 class="fw-bold mb-3">Status</h5>
+                                    <div class="mb-3">
+                                        <select name="status" id="status" class="form-select">
+                                            <option value="active" {{ old('status', $product->status) == 'active' ? 'selected' : '' }}>Active</option>
+                                            <option value="inactive" {{ old('status', $product->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                        </select>
+                                    </div>
 
-                                <div class="form-text">
-                                    Active products are visible in the customer store.
+                                    <div class="mt-4">
+                                        <a href="{{ route('admin.variants.index', $product->id) }}" class="btn btn-outline-secondary w-100">
+                                            Manage Product Variants (Stock/Size) →
+                                        </a>
+                                    </div>
                                 </div>
-
                             </div>
-
-
-                            {{-- Buttons --}}
-
-                            <div class="d-flex flex-column flex-sm-row gap-2">
-
-                                <button
-                                    type="submit"
-                                    class="btn btn-dark px-4"
-                                >
-                                    Update Product
-                                </button>
-
-                                <a
-                                    href="{{ route('products.index') }}"
-                                    class="btn btn-outline-secondary px-4"
-                                >
-                                    Cancel
-                                </a>
-
-                            </div>
-
-                        </form>
-
+                        </div>
                     </div>
 
-                </div>
+                    <div class="text-end mb-5">
+                        <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-dark px-5 py-2 fw-semibold">Update Product</button>
+                    </div>
+                </form>
 
             </div>
-
         </div>
-
     </div>
 
-
-    {{-- Footer --}}
-
-    <footer class="bg-dark text-white mt-5">
-
-        <div class="container py-4 text-center">
-
-            <p class="mb-0 text-white-50 small">
-                © {{ date('Y') }} HYPELINE. All rights reserved.
-            </p>
-
-        </div>
-
-    </footer>
-
-
 </body>
-
 </html>

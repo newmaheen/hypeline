@@ -1,4 +1,4 @@
-```blade
+﻿```blade
 <!DOCTYPE html>
 <html>
 

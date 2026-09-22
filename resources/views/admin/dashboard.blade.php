@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -18,13 +18,19 @@
             HYPELINE ADMIN
         </span>
 
-        <form method="POST" action="{{ route('admin.logout') }}">
-            @csrf
+        <div class="d-flex align-items-center gap-2">
+            {{-- Navbar Change Password Button --}}
+            <a href="{{ route('admin.password.change') }}" class="btn btn-outline-light btn-sm">
+                Change Password
+            </a>
 
-            <button type="submit" class="btn btn-outline-light btn-sm">
-                Logout
-            </button>
-        </form>
+            <form method="POST" action="{{ route('admin.logout') }}">
+                @csrf
+                <button type="submit" class="btn btn-danger btn-sm">
+                    Logout
+                </button>
+            </form>
+        </div>
 
     </div>
 </nav>
@@ -281,22 +287,22 @@
 
     <div class="row g-4 mb-5">
 
-        {{-- Categories --}}
-        <div class="col-12 col-md-4">
+        {{-- New Offline Sale (POS) --}}
+        <div class="col-12 col-md-6 col-lg-3">
 
-            <a href="{{ route('admin.categories.index') }}"
+            <a href="{{ route('admin.offline-sales.create') }}"
                class="text-decoration-none">
 
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
 
                     <div class="card-body p-4">
 
-                        <h5 class="fw-bold text-dark">
-                            Categories
+                        <h5 class="fw-bold text-success">
+                            + New Offline Sale
                         </h5>
 
                         <p class="text-muted mb-0">
-                            View and manage product categories.
+                            Create a direct store bill/receipt.
                         </p>
 
                     </div>
@@ -307,11 +313,10 @@
 
         </div>
 
-
         {{-- Add Product --}}
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6 col-lg-3">
 
-            <a href="{{ route('products.create') }}"
+            <a href="{{ route('admin.products.create') }}"
                class="text-decoration-none">
 
                 <div class="card border-0 shadow-sm h-100">
@@ -334,11 +339,36 @@
 
         </div>
 
+        {{-- Categories --}}
+        <div class="col-12 col-md-6 col-lg-3">
+
+            <a href="{{ route('admin.categories.index') }}"
+               class="text-decoration-none">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-body p-4">
+
+                        <h5 class="fw-bold text-dark">
+                            Categories
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            View and manage categories.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
 
         {{-- Products & Variants --}}
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6 col-lg-3">
 
-            <a href="{{ route('products.index') }}"
+            <a href="{{ route('admin.products.index') }}"
                class="text-decoration-none">
 
                 <div class="card border-0 shadow-sm h-100">
@@ -350,7 +380,7 @@
                         </h5>
 
                         <p class="text-muted mb-0">
-                            View products and manage their variants.
+                            Manage inventory variants.
                         </p>
 
                     </div>
@@ -371,8 +401,8 @@
 
     <div class="row g-4">
 
-        {{-- Orders --}}
-        <div class="col-12 col-md-4">
+        {{-- Online Orders --}}
+        <div class="col-12 col-md-6 col-lg-3">
 
             <a href="{{ route('admin.orders.index') }}"
                class="text-decoration-none">
@@ -382,11 +412,11 @@
                     <div class="card-body p-4">
 
                         <h5 class="fw-bold text-dark">
-                            Orders
+                            Online Orders
                         </h5>
 
                         <p class="text-muted mb-0">
-                            View and manage customer orders.
+                            Manage customer store orders.
                         </p>
 
                     </div>
@@ -397,9 +427,34 @@
 
         </div>
 
+        {{-- Offline Sales --}}
+        <div class="col-12 col-md-6 col-lg-3">
+
+            <a href="{{ route('admin.offline-sales.index') }}"
+               class="text-decoration-none">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-body p-4">
+
+                        <h5 class="fw-bold text-dark">
+                            Offline Sales
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            View physical store receipts & sales.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
 
         {{-- Inventory --}}
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6 col-lg-3">
 
             <a href="{{ route('admin.inventory.index') }}"
                class="text-decoration-none">
@@ -424,9 +479,8 @@
 
         </div>
 
-
         {{-- Sales Report --}}
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6 col-lg-3">
 
             <a href="{{ route('admin.sales-report.index') }}"
                class="text-decoration-none">
@@ -440,7 +494,7 @@
                         </h5>
 
                         <p class="text-muted mb-0">
-                            View sales performance and reports.
+                            View sales performance and analytics.
                         </p>
 
                     </div>
@@ -467,4 +521,3 @@
 
 </body>
 </html>
-

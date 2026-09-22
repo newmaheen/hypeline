@@ -1,4 +1,4 @@
-<div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 1rem;">
+﻿<div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 1rem;">
     <img 
         src="{{ asset('images/hypeline-logo-2.png') }}" 
         alt="Hypeline Logo" 

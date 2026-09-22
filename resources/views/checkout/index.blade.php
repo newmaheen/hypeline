@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en">
 
@@ -282,20 +282,23 @@
 
 
                             <div class="mb-3">
-
-                                <label class="form-label">
-                                    Phone Number
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="customer_phone"
-                                    class="form-control"
-                                    placeholder="Enter your phone number"
+                                <label for="customer_phone" class="form-label">Phone Number / মোবাইল নম্বর <span class="text-danger">*</span></label>
+                                <input 
+                                    type="tel" 
+                                    name="customer_phone" 
+                                    id="customer_phone" 
+                                    class="form-control @error('customer_phone') is-invalid @enderror"
                                     value="{{ old('customer_phone') }}"
+                                    placeholder="017XXXXXXXX"
+                                    pattern="^(?:\+88|88)?01[3-9]\d{8}$"
+                                    maxlength="14"
                                     required
                                 >
-
+                                @error('customer_phone')
+                                    <div class="invalid-feedback text-danger d-block">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             </div>
 
 
