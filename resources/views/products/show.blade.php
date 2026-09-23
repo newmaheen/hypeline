@@ -289,9 +289,9 @@
             @if($errors->any())
                 <div class="alert alert-danger mb-4">
                     <ul class="mb-0">
-                        @foreach($errors->all() as$error)
+                        <?php foreach ($errors->all() as$error): ?>
                             <li>{{ $error }}</li>
-                        @endforeach
+                        <?php endforeach; ?>
                     </ul>
                 </div>
             @endif
@@ -329,14 +329,14 @@
 
                     @if(count($allImages) > 1)
                         <div class="product-thumbnails">
-                            @foreach($allImages as $index =>$img)
+                            <?php foreach ($allImages as $index =>$img): ?>
                                 @php
                                     $thumbUrl = str_starts_with($img, 'http') ? $img : asset('storage/' .$img);
                                 @endphp
                                 <div class="product-thumbnail {{ $index === 0 ? 'active' : '' }}" onclick="changeMainImage('{{ $thumbUrl }}', this)">
                                     <img src="{{ $thumbUrl }}" alt="{{ $product->name }}">
                                 </div>
-                            @endforeach
+                            <?php endforeach; ?>
                         </div>
                     @endif
                 </div>
@@ -382,11 +382,11 @@
                                 <div>
                                     <div class="option-title">Select Size</div>
                                     <div class="option-buttons">
-                                        @foreach($sizes as$size)
+                                        <?php foreach ($sizes as$size): ?>
                                             <button type="button" class="option-button size-button" data-size="{{ $size }}">
                                                 {{ $size }}
                                             </button>
-                                        @endforeach
+                                        <?php endforeach; ?>
                                     </div>
                                 </div>
                             @endif
@@ -403,11 +403,11 @@
                                 <div>
                                     <div class="option-title">Select Color</div>
                                     <div class="option-buttons">
-                                        @foreach($colors as$color)
+                                        <?php foreach ($colors as$color): ?>
                                             <button type="button" class="option-button color-button" data-color="{{ $color }}">
                                                 {{ $color }}
                                             </button>
-                                        @endforeach
+                                        <?php endforeach; ?>
                                     </div>
                                 </div>
                             @endif
