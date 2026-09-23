@@ -46,7 +46,7 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lt:price',
             'images' => 'required|array|min:3',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:4096',
             'variants' => 'required|array|min:1',
             'variants.*.size' => 'required|string|max:50',
             'variants.*.color' => 'required|string|max:50',
@@ -57,11 +57,14 @@ class ProductController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            // ১. ছবি আপলোড
+            // ১. ছবি Cloudinary-তে পার্মানেন্ট আপলোড
             $imagePaths = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
-                    $imagePaths[] = $file->store('products', 'public');
+                    $uploadedFile = cloudinary()->upload($file->getRealPath(), [
+                        'folder' => 'hypeline_products'
+                    ])->getSecurePath();
+                    $imagePaths[] = $uploadedFile;
                 }
             }
 
@@ -77,7 +80,7 @@ class ProductController extends Controller
                 'status' => $request->has('is_active') ? 'active' : 'inactive',
             ]);
 
-            // ৩. ভ্যারিয়েন্ট ও স্টক সেভ
+            // ৩. ভ্যারিয়েন্ট ও স্টক সেভ
             foreach ($request->variants as $variantData) {
                 ProductVariant::create([
                     'product_id' => $product->id,
@@ -89,7 +92,7 @@ class ProductController extends Controller
             }
         });
 
-        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট এবং ভ্যারিয়েন্ট সফলভাবে তৈরি হয়েছে!');
+        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট এবং ভ্যারিয়েন্ট সফলভাবে তৈরি হয়েছে!');
     }
 
     public function edit(Product $product)
@@ -107,7 +110,7 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0',
             'images' => 'nullable|array|min:3',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         $data = [
@@ -120,24 +123,20 @@ class ProductController extends Controller
         ];
 
         if ($request->hasFile('images')) {
-            if (!empty($product->images) && is_array($product->images)) {
-                foreach ($product->images as $oldImage) {
-                    if (Storage::disk('public')->exists($oldImage)) {
-                        Storage::disk('public')->delete($oldImage);
-                    }
-                }
-            }
-
+            // নতুন ছবি আপলোড Cloudinary-তে
             $newPaths = [];
             foreach ($request->file('images') as $file) {
-                $newPaths[] = $file->store('products', 'public');
+                $uploadedFile = cloudinary()->upload($file->getRealPath(), [
+                    'folder' => 'hypeline_products'
+                ])->getSecurePath();
+                $newPaths[] = $uploadedFile;
             }
             $data['images'] = $newPaths;
         }
 
         $product->update($data);
 
-        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট সফলভাবে আপডেট হয়েছে!');
+        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট সফলভাবে আপডেট হয়েছে!');
     }
 
     public function destroy(Product $product)
@@ -157,6 +156,6 @@ class ProductController extends Controller
         $product->variants()->delete();
         $product->delete();
 
-        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট মুছে ফেলা হয়েছে!');
+        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট মুছে ফেলা হয়েছে!');
     }
 }
