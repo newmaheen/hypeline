@@ -1,19 +1,14 @@
 ﻿<!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <title>Shopping Cart - Hypeline</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-
         body {
             background: #f8f8f8;
             color: #111;
@@ -254,7 +249,6 @@
         }
 
         @media (max-width: 767px) {
-
             .cart-page {
                 padding: 30px 0 50px;
             }
@@ -282,11 +276,8 @@
                 padding: 8px 12px;
                 font-size: 12px;
             }
-
         }
-
     </style>
-
 </head>
 
 <body>
@@ -294,162 +285,105 @@
     @include('layouts.navigation')
 
     <div class="cart-page">
-
         <div class="container">
 
             {{-- CART HEADER --}}
-
             <div class="d-flex justify-content-between align-items-center mb-4">
-
-                <h1 class="cart-title mb-0">
-                    Shopping Cart
-                </h1>
+                <h1 class="cart-title mb-0">Shopping Cart</h1>
 
                 @if(count($cart))
-
                     <form
                         method="POST"
                         action="{{ route('cart.clear') }}"
                         onsubmit="return confirm('Are you sure you want to clear your cart?');"
                     >
-
                         @csrf
-
                         @method('DELETE')
-
-                        <button
-                            type="submit"
-                            class="clear-cart-button"
-                        >
-                            CLEAR CART
-                        </button>
-
+                        <button type="submit" class="clear-cart-button">CLEAR CART</button>
                     </form>
-
                 @endif
-
             </div>
 
             {{-- SUCCESS MESSAGE --}}
-
             @if(session('success'))
-
                 <div class="alert alert-success cart-alert">
-
                     {{ session('success') }}
-
                 </div>
-
             @endif
 
             {{-- ERROR MESSAGE --}}
-
             @if($errors->any())
-
                 <div class="alert alert-danger cart-alert">
-
                     @foreach($errors->all() as $error)
-
-                        <div>
-                            {{ $error }}
-                        </div>
-
+                        <div>{{ $error }}</div>
                     @endforeach
-
                 </div>
-
             @endif
 
             {{-- CART HAS ITEMS --}}
-
             @if(count($cart))
-
                 <div class="row g-4">
 
                     {{-- CART ITEMS --}}
-
                     <div class="col-12 col-lg-8">
-
                         @foreach($cart as $item)
+                            @php
+                                $itemImgUrl = null;
+                                if (!empty($item['image'])) {
+                                    $itemImgUrl = str_starts_with($item['image'], 'http') 
+                                        ? $item['image'] 
+                                        : asset('storage/' . $item['image']);
+                                }
+                            @endphp
 
                             <div class="cart-item">
-
                                 <div class="row align-items-center">
 
                                     {{-- PRODUCT INFO --}}
-
                                     <div class="col-12 col-md-5">
-
-                                        @if(!empty($item['image']))
-
+                                        @if($itemImgUrl)
                                             <div class="cart-product-image">
-
                                                 <img
-                                                    src="{{ asset('storage/' . $item['image']) }}"
+                                                    src="{{ $itemImgUrl }}"
                                                     alt="{{ $item['name'] }}"
                                                 >
-
                                             </div>
-
                                         @endif
 
                                         <div class="cart-item-name">
-
                                             {{ $item['name'] }}
-
                                         </div>
 
                                         <div class="cart-meta">
-
                                             Size:
-
-                                            <strong>
-                                                {{ $item['size'] ?? 'N/A' }}
-                                            </strong>
-
+                                            <strong>{{ $item['size'] ?? 'N/A' }}</strong>
                                         </div>
 
                                         <div class="cart-meta">
-
                                             Color:
-
-                                            <strong>
-                                                {{ $item['color'] ?? 'N/A' }}
-                                            </strong>
-
+                                            <strong>{{ $item['color'] ?? 'N/A' }}</strong>
                                         </div>
 
                                         <div class="cart-price">
-
                                             ৳{{ number_format($item['price'], 0) }}
-
                                         </div>
-
                                     </div>
 
                                     {{-- QUANTITY --}}
-
                                     <div class="col-12 col-md-4 mt-3 mt-md-0">
-
                                         <form
                                             method="POST"
                                             action="{{ route('cart.update', $item['variant_id']) }}"
                                         >
-
                                             @csrf
-
                                             @method('PUT')
 
                                             <div class="d-flex align-items-center gap-2">
-
                                                 <div class="quantity-control">
-
                                                     <button
                                                         type="button"
                                                         onclick="decreaseQuantity(this)"
-                                                    >
-                                                        −
-                                                    </button>
+                                                    >−</button>
 
                                                     <input
                                                         type="number"
@@ -461,203 +395,96 @@
                                                     <button
                                                         type="button"
                                                         onclick="increaseQuantity(this)"
-                                                    >
-                                                        +
-                                                    </button>
-
+                                                    >+</button>
                                                 </div>
 
-                                                <button
-                                                    type="submit"
-                                                    class="update-button"
-                                                >
-                                                    Update
-                                                </button>
-
+                                                <button type="submit" class="update-button">Update</button>
                                             </div>
-
                                         </form>
 
                                         {{-- REMOVE --}}
-
                                         <form
                                             method="POST"
                                             action="{{ route('cart.remove', $item['variant_id']) }}"
                                             class="mt-2"
                                         >
-
                                             @csrf
-
                                             @method('DELETE')
-
-                                            <button
-                                                type="submit"
-                                                class="remove-button"
-                                            >
-                                                Remove
-                                            </button>
-
+                                            <button type="submit" class="remove-button">Remove</button>
                                         </form>
-
                                     </div>
 
                                     {{-- SUBTOTAL --}}
-
                                     <div class="col-12 col-md-3">
-
                                         <div class="cart-subtotal">
-
                                             Subtotal
                                             <br>
-
-                                            <span>
-
-                                                ৳{{ number_format($item['price'] * $item['quantity'], 0) }}
-
-                                            </span>
-
+                                            <span>৳{{ number_format($item['price'] * $item['quantity'], 0) }}</span>
                                         </div>
-
                                     </div>
 
                                 </div>
-
                             </div>
-
                         @endforeach
-
                     </div>
 
                     {{-- ORDER SUMMARY --}}
-
                     <div class="col-12 col-lg-4">
-
                         <div class="cart-summary">
+                            <div class="summary-title">Order Summary</div>
 
-                            <div class="summary-title">
-
-                                Order Summary
-
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+                                <span>৳{{ number_format($total, 0) }}</span>
                             </div>
 
                             <div class="summary-row">
-
-                                <span>
-                                    Subtotal
-                                </span>
-
-                                <span>
-                                    ৳{{ number_format($total, 0) }}
-                                </span>
-
-                            </div>
-
-                            <div class="summary-row">
-
-                                <span>
-                                    Delivery
-                                </span>
-
-                                <span>
-                                    Calculated at checkout
-                                </span>
-
+                                <span>Delivery</span>
+                                <span>Calculated at checkout</span>
                             </div>
 
                             <div class="summary-total">
-
-                                <span>
-                                    Total
-                                </span>
-
-                                <span>
-                                    ৳{{ number_format($total, 0) }}
-                                </span>
-
+                                <span>Total</span>
+                                <span>৳{{ number_format($total, 0) }}</span>
                             </div>
 
                             <a
                                 href="{{ route('checkout.index') }}"
                                 class="btn checkout-button d-flex align-items-center justify-content-center"
-                            >
-                                PROCEED TO CHECKOUT
-                            </a>
+                            >PROCEED TO CHECKOUT</a>
 
-                            <a
-                                href="{{ route('home') }}"
-                                class="continue-shopping"
-                            >
-                                ← Continue Shopping
-                            </a>
-
+                            <a href="{{ route('home') }}" class="continue-shopping">← Continue Shopping</a>
                         </div>
-
                     </div>
 
                 </div>
-
             @else
-
                 {{-- EMPTY CART --}}
-
                 <div class="empty-cart">
-
-                    <h2>
-                        Your cart is empty
-                    </h2>
-
-                    <p>
-                        Looks like you haven't added anything yet.
-                    </p>
-
-                    <a
-                        href="{{ route('home') }}"
-                        class="shop-button"
-                    >
-                        START SHOPPING
-                    </a>
-
+                    <h2>Your cart is empty</h2>
+                    <p>Looks like you haven't added anything yet.</p>
+                    <a href="{{ route('home') }}" class="shop-button">START SHOPPING</a>
                 </div>
-
             @endif
 
         </div>
-
     </div>
 
     <script>
-
         function decreaseQuantity(button) {
-
-            const input =
-                button.parentElement.querySelector('input');
-
-            let value =
-                parseInt(input.value);
-
+            const input = button.parentElement.querySelector('input');
+            let value = parseInt(input.value);
             if (value > 1) {
-
                 input.value = value - 1;
-
             }
-
         }
-
 
         function increaseQuantity(button) {
-
-            const input =
-                button.parentElement.querySelector('input');
-
-            let value =
-                parseInt(input.value);
-
+            const input = button.parentElement.querySelector('input');
+            let value = parseInt(input.value);
             input.value = value + 1;
-
         }
-
     </script>
 
 </body>
-
 </html>

@@ -265,7 +265,7 @@
         }
 
 
-        /* FOOTER (PURE CSS - NO BOOTSTRAP NEEDED) */
+        /* FOOTER */
 
         .site-footer {
             background: #0d0d0d;
@@ -525,6 +525,14 @@
                         $images = is_array($product->images) ? $product->images : json_decode($product->images, true);
                     }
                     $displayImage = (!empty($images) && isset($images[0])) ? $images[0] : $product->image;
+                    
+                    // Cloudinary বা Local Storage URL ঠিক করার লজিক
+                    $imageUrl = null;
+                    if ($displayImage) {
+                        $imageUrl = str_starts_with($displayImage, 'http') 
+                            ? $displayImage 
+                            : asset('storage/' . $displayImage);
+                    }
                 @endphp
 
                 <div class="product-card">
@@ -532,9 +540,9 @@
                     {{-- IMAGE --}}
                     <div class="product-image-box">
 
-                        @if($displayImage)
+                        @if($imageUrl)
                             <img
-                                src="{{ asset('storage/' . $displayImage) }}"
+                                src="{{ $imageUrl }}"
                                 alt="{{ $product->name }}"
                                 class="product-image"
                             >

@@ -304,7 +304,7 @@
             @if($errors->any())
                 <div class="alert alert-danger mb-4">
                     <ul class="mb-0">
-                        @foreach($errors->all() as $error)
+                        @foreach($errors->all() as$error)
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>
@@ -321,7 +321,12 @@
                 } elseif (!empty($product->image)) {
                     $allImages[] =$product->image;
                 }
-                $firstImage = count($allImages) > 0 ? asset('storage/' . $allImages[0]) : null;
+
+                $firstImage = null;
+                if (count($allImages) > 0) {
+                    $first =$allImages[0];
+                    $firstImage = str_starts_with($first, 'http') ? $first : asset('storage/' .$first);
+                }
             @endphp
 
             <div class="row g-5 align-items-center justify-content-center">
@@ -342,9 +347,12 @@
                     @if(count($allImages) > 1)
                         <div class="product-thumbnails">
                             @foreach($allImages as $index =>$img)
+                                @php
+                                    $thumbUrl = str_starts_with($img, 'http') ? $img : asset('storage/' .$img);
+                                @endphp
                                 <div class="product-thumbnail {{ $index === 0 ? 'active' : '' }}" 
-                                     onclick="changeMainImage('{{ asset('storage/' . $img) }}', this)">
-                                    <img src="{{ asset('storage/' . $img) }}" alt="{{ $product->name }}">
+                                     onclick="changeMainImage('{{ $thumbUrl }}', this)">
+                                    <img src="{{ $thumbUrl }}" alt="{{ $product->name }}">
                                 </div>
                             @endforeach
                         </div>
@@ -399,7 +407,7 @@
                                 <div>
                                     <div class="option-title">Select Size</div>
                                     <div class="option-buttons">
-                                        @foreach($sizes as $size)
+                                        @foreach($sizes as$size)
                                             <button type="button" class="option-button size-button" data-size="{{ $size }}">
                                                 {{ $size }}
                                             </button>
@@ -421,7 +429,7 @@
                                 <div>
                                     <div class="option-title">Select Color</div>
                                     <div class="option-buttons">
-                                        @foreach($colors as $color)
+                                        @foreach($colors as$color)
                                             <button type="button" class="option-button color-button" data-color="{{ $color }}">
                                                 {{ $color }}
                                             </button>
@@ -538,7 +546,6 @@
 
         /* FIND MATCHING VARIANT */
         function findVariant() {
-            // যদি সাইজ ও কালার অপশন না থাকে (সিম্পল প্রোডাক্ট)
             if (variants.length === 0) {
                 addToCartButton.disabled = false;
                 stockMessage.innerText = '';
