@@ -103,34 +103,37 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        $request->validate([
+        // ১. ভ্যালিডেশন রুলস: ছবি আপলোড করলেই কেবল ৩টির শর্ত কাজ করবে, নাহলে ইগনোর করবে
+        $rules = [
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0',
-            'images' => 'nullable|array|min:3',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:4096',
-        ]);
+            'status' => 'required|in:active,inactive',
+        ];
 
-        // Status logic fix: Form theke select dropdown ba checkbox ja-i asuk, inactive handle korbe
-        if ($request->filled('status')) {
-            $status = $request->input('status');
-        } else {
-            $status = $request->has('is_active') ? 'active' : 'inactive';
+        if ($request->hasFile('images')) {
+            $rules['images'] = 'array|min:3';
+            $rules['images.*'] = 'image|mimes:jpeg,png,jpg,webp|max:4096';
         }
 
+        $request->validate($rules, [
+            'images.min' => 'নতুন ছবি দিলে কমপক্ষে ৩টি ছবি আপলোড করতে হবে।',
+        ]);
+
+        // ২. ডাটা প্রস্তুত করা (সরাসরি ফর্মের status গ্রহণ করবে)
         $data = [
             'category_id' => $request->category_id,
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
             'sale_price' => $request->sale_price,
-            'status' => $status,
+            'status' => $request->status,
         ];
 
+        // ৩. যদি নতুন ছবি দিয়ে থাকে, তবেই ক্লাউডিনারিতে আপলোড হবে
         if ($request->hasFile('images')) {
-            // Notun chobi Cloudinary-te upload
             $newPaths = [];
             foreach ($request->file('images') as $file) {
                 $uploadedFile = cloudinary()->upload($file->getRealPath(), [
@@ -141,6 +144,7 @@ class ProductController extends Controller
             $data['images'] = $newPaths;
         }
 
+        // ৪. আপডেট সম্পন্ন
         $product->update($data);
 
         return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট সফলভাবে আপডেট হয়েছে!');
