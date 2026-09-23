@@ -329,12 +329,11 @@
 
                     @if(count($allImages) > 1)
                         <div class="product-thumbnails">
-                            @foreach ($allImages as $index =>$img)
+                            @foreach($allImages as $index =>$img)
                                 @php
                                     $thumbUrl = str_starts_with($img, 'http') ? $img : asset('storage/' .$img);
                                 @endphp
-                                <div class="product-thumbnail {{ $index === 0 ? 'active' : '' }}" 
-                                     onclick="changeMainImage('{{ $thumbUrl }}', this)">
+                                <div class="product-thumbnail {{ $index === 0 ? 'active' : '' }}" onclick="changeMainImage('{{ $thumbUrl }}', this)">
                                     <img src="{{ $thumbUrl }}" alt="{{ $product->name }}">
                                 </div>
                             @endforeach
@@ -383,7 +382,7 @@
                                 <div>
                                     <div class="option-title">Select Size</div>
                                     <div class="option-buttons">
-                                        @foreach ($sizes as$size)
+                                        @foreach($sizes as$size)
                                             <button type="button" class="option-button size-button" data-size="{{ $size }}">
                                                 {{ $size }}
                                             </button>
@@ -404,7 +403,7 @@
                                 <div>
                                     <div class="option-title">Select Color</div>
                                     <div class="option-buttons">
-                                        @foreach ($colors as$color)
+                                        @foreach($colors as$color)
                                             <button type="button" class="option-button color-button" data-color="{{ $color }}">
                                                 {{ $color }}
                                             </button>
