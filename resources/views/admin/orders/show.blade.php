@@ -86,9 +86,9 @@
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
                 <h5 class="fw-bold mb-3">Update Order Status</h5>
-                    <form method="POST" action="{{ route('admin.orders.update-status', $order->order_code ?? $order->id) }}" class="row g-3 align-items-end">
-                            @csrf
-                            @method('PUT')
+                <form method="POST" action="{{ route('admin.orders.update-status', $order->order_code ?? $order->id) }}" class="row g-3 align-items-end">
+                    @csrf
+                    @method('PUT')
 
                     <div class="col-12 col-md-6 col-lg-4">
                         <label for="status" class="form-label fw-semibold">Order Status</label>
@@ -214,13 +214,39 @@
                 <h5 class="fw-bold mb-4">Ordered Products</h5>
 
                 @foreach($order->items as $item)
-                    <div class="border rounded p-3 mb-3">
+                    @php
+                        $imageSrc = null;
+                        if ($item->product) {
+                            if (!empty($item->product->images) && is_array($item->product->images)) {
+                                $imageSrc = asset('storage/' . $item->product->images[0]);
+                            } elseif (!empty($item->product->image)) {
+                                $imageSrc = asset('storage/' . $item->product->image);
+                            }
+                        }
+                    @endphp
+
+                    <div class="border rounded p-3 mb-3 bg-white">
                         <div class="row g-3 align-items-center">
-                            <div class="col-12 col-md-5">
-                                <h6 class="fw-bold mb-2">{{ $item->product_name }}</h6>
-                                <div class="text-muted small">
-                                    <span class="me-3">Size: <strong>{{ $item->size ?? 'N/A' }}</strong></span>
-                                    <span>Color: <strong>{{ $item->color ?? 'N/A' }}</strong></span>
+                            {{-- Product Image + Name Column --}}
+                            <div class="col-12 col-md-5 d-flex align-items-center gap-3">
+                                @if($imageSrc)
+                                    <img src="{{ $imageSrc }}" 
+                                         alt="{{ $item->product_name }}" 
+                                         class="rounded border flex-shrink-0" 
+                                         style="width: 58px; height: 58px; object-fit: cover;">
+                                @else
+                                    <div class="rounded border bg-light text-muted d-flex align-items-center justify-content-center flex-shrink-0" 
+                                         style="width: 58px; height: 58px; font-size: 11px;">
+                                        No Image
+                                    </div>
+                                @endif
+
+                                <div>
+                                    <h6 class="fw-bold mb-1 text-dark">{{ $item->product_name }}</h6>
+                                    <div class="text-muted small">
+                                        <span class="me-3">Size: <strong>{{ $item->size ?? 'N/A' }}</strong></span>
+                                        <span>Color: <strong>{{ $item->color ?? 'N/A' }}</strong></span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -236,7 +262,7 @@
 
                             <div class="col-12 col-md-3 text-md-end">
                                 <small class="text-muted d-block">Subtotal</small>
-                                <span class="fw-bold">৳{{ number_format($item->subtotal, 2) }}</span>
+                                <span class="fw-bold text-dark">৳{{ number_format($item->subtotal, 2) }}</span>
                             </div>
                         </div>
                     </div>
@@ -246,7 +272,7 @@
                 <div class="border-top pt-4 mt-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold mb-0">Order Total</h5>
-                        <h4 class="fw-bold mb-0">৳{{ number_format($order->total_amount, 2) }}</h4>
+                        <h4 class="fw-bold mb-0 text-dark">৳{{ number_format($order->total_amount, 2) }}</h4>
                     </div>
                 </div>
 
