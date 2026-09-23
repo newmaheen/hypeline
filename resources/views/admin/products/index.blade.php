@@ -77,13 +77,14 @@
                                             <span class="text-muted">#{{ $product->id }}</span>
                                         </td>
 
-                                        {{-- Image --}}
+                                        {{-- Image (Cloudinary ও Local দুইটাই সাপোর্ট করবে) --}}
                                         <td>
                                             @php
                                                 $firstImage = is_array($product->images) ? ($product->images[0] ?? null) : null;
+                                                $imageUrl = $firstImage ? (str_starts_with($firstImage, 'http') ? $firstImage : asset('storage/' . $firstImage)) : null;
                                             @endphp
-                                            @if($firstImage)
-                                                <img src="{{ asset('storage/' . $firstImage) }}"
+                                            @if($imageUrl)
+                                                <img src="{{ $imageUrl }}"
                                                      alt="{{ $product->name }}"
                                                      class="rounded border"
                                                      style="width: 65px; height: 65px; object-fit: cover;">
@@ -126,7 +127,7 @@
 
                                         {{-- Status --}}
                                         <td>
-                                            @if($product->status === 'active' || $product->is_active)
+                                            @if($product->is_active)
                                                 <span class="badge text-bg-success">Active</span>
                                             @else
                                                 <span class="badge text-bg-secondary">Inactive</span>

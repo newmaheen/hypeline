@@ -103,7 +103,6 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        // ১. ভ্যালিডেশন রুলস: ছবি আপলোড করলেই কেবল ৩টির শর্ত কাজ করবে, নাহলে ইগনোর করবে
         $rules = [
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
@@ -119,20 +118,18 @@ class ProductController extends Controller
         }
 
         $request->validate($rules, [
-            'images.min' => 'নতুন ছবি দিলে কমপক্ষে ৩টি ছবি আপলোড করতে হবে।',
+            'images.min' => 'Notun chobi dile kompokkhe 3-ti chobi upload korte hobe.',
         ]);
 
-        // ২. ডাটা প্রস্তুত করা (সরাসরি ফর্মের status গ্রহণ করবে)
         $data = [
             'category_id' => $request->category_id,
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
             'sale_price' => $request->sale_price,
-            'status' => $request->status,
+            'is_active' => ($request->status === 'active') ? 1 : 0, // Database column is_active update hobe
         ];
 
-        // ৩. যদি নতুন ছবি দিয়ে থাকে, তবেই ক্লাউডিনারিতে আপলোড হবে
         if ($request->hasFile('images')) {
             $newPaths = [];
             foreach ($request->file('images') as $file) {
@@ -144,10 +141,9 @@ class ProductController extends Controller
             $data['images'] = $newPaths;
         }
 
-        // ৪. আপডেট সম্পন্ন
         $product->update($data);
 
-        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট সফলভাবে আপডেট হয়েছে!');
+        return redirect()->route('admin.products.index')->with('success', 'Product shofolbhabe update hoyeche!');
     }
 
     public function destroy(Product $product)

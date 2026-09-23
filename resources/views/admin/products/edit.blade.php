@@ -119,8 +119,8 @@
                                     <h5 class="fw-bold mb-3">Status</h5>
                                     <div class="mb-3">
                                         <select name="status" id="status" class="form-select">
-                                            <option value="active" {{ old('status', $product->status) == 'active' ? 'selected' : '' }}>Active</option>
-                                            <option value="inactive" {{ old('status', $product->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                            <option value="active" {{ old('status', $product->is_active ? 'active' : 'inactive') === 'active' ? 'selected' : '' }}>Active</option>
+                                            <option value="inactive" {{ old('status', $product->is_active ? 'active' : 'inactive') === 'inactive' ? 'selected' : '' }}>Inactive</option>
                                         </select>
                                     </div>
 
