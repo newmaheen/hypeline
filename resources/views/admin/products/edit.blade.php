@@ -70,11 +70,21 @@
                                         </select>
                                     </div>
 
-                                    <div class="row g-3 mb-3">
-                                        <div class="col-12 col-md-6">
-                                            <label for="price" class="form-label fw-semibold">Regular Price (৳)</label>
-                                            <input type="number" step="0.01" name="price" id="price" class="form-control" value="{{ old('price', $product->price) }}" required>
+                                   {{-- Existing Images Preview --}}
+                                    @if (!empty($product->images) && is_array($product->images))
+                                        <div class="d-flex flex-wrap gap-2 mb-3">
+                                            @foreach ($product->images as $img)
+                                                @php
+                                                    $previewUrl = str_starts_with($img, 'http') ? $img : asset('storage/' . $img);
+                                                @endphp
+                                                <div class="border rounded p-1 bg-white">
+                                                    <img src="{{ $previewUrl }}" alt="Preview" width="70" height="70" class="rounded" style="object-fit: cover;">
+                                                </div>
+                                            @endforeach
                                         </div>
+                                    @else
+                                        <p class="text-muted small mb-3">No images uploaded yet.</p>
+                                    @endif
                                         <div class="col-12 col-md-6">
                                             <label for="sale_price" class="form-label fw-semibold">Sale Price (৳) <small class="text-muted">(Optional)</small></label>
                                             <input type="number" step="0.01" name="sale_price" id="sale_price" class="form-control" value="{{ old('sale_price', $product->sale_price) }}">

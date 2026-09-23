@@ -77,7 +77,7 @@ class ProductController extends Controller
                 'price' => $request->price,
                 'sale_price' => $request->sale_price,
                 'images' => $imagePaths,
-                'status' => $request->has('is_active') ? 'active' : 'inactive',
+                'status' => ($request->has('is_active') || $request->input('status') === 'active') ? 'active' : 'inactive',
             ]);
 
             // ৩. ভ্যারিয়েন্ট ও স্টক সেভ
@@ -113,17 +113,24 @@ class ProductController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
+        // Status logic fix: Form theke select dropdown ba checkbox ja-i asuk, inactive handle korbe
+        if ($request->filled('status')) {
+            $status = $request->input('status');
+        } else {
+            $status = $request->has('is_active') ? 'active' : 'inactive';
+        }
+
         $data = [
             'category_id' => $request->category_id,
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
             'sale_price' => $request->sale_price,
-            'status' => $request->status ?? $product->status,
+            'status' => $status,
         ];
 
         if ($request->hasFile('images')) {
-            // নতুন ছবি আপলোড Cloudinary-তে
+            // Notun chobi Cloudinary-te upload
             $newPaths = [];
             foreach ($request->file('images') as $file) {
                 $uploadedFile = cloudinary()->upload($file->getRealPath(), [
