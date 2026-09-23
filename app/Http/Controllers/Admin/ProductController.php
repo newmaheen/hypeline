@@ -10,10 +10,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Cloudinary;
 
 class ProductController extends Controller
 {
+    /**
+     * Helper to get configured Cloudinary instance
+     */
+    private function getCloudinaryClient(): Cloudinary
+    {
+        $cloudinaryUrl = env('CLOUDINARY_URL') ?: (
+            (env('CLOUDINARY_API_KEY') && env('CLOUDINARY_API_SECRET') && env('CLOUDINARY_CLOUD_NAME'))
+                ? 'cloudinary://' . env('CLOUDINARY_API_KEY') . ':' . env('CLOUDINARY_API_SECRET') . '@' . env('CLOUDINARY_CLOUD_NAME')
+                : null
+        );
+
+        return new Cloudinary($cloudinaryUrl);
+    }
+
     public function index(Request $request)
     {
         $query = Product::with(['category', 'variants'])->latest();
@@ -58,18 +72,20 @@ class ProductController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            // ১. ছবি Cloudinary Facade দিয়ে আপলোড
+            // ১. ছবি Cloudinary-তে সরাসরি SDK দিয়ে আপলোড
             $imagePaths = [];
             if ($request->hasFile('images')) {
+                $cloudinary = $this->getCloudinaryClient();
+
                 foreach ($request->file('images') as $file) {
-                    $uploadedFile = Cloudinary::upload($file->getRealPath(), [
+                    $uploadResult = $cloudinary->uploadApi()->upload($file->getRealPath(), [
                         'folder' => 'hypeline_products'
-                    ])->getSecurePath();
-                    $imagePaths[] = $uploadedFile;
+                    ]);
+                    $imagePaths[] = $uploadResult['secure_url'];
                 }
             }
 
-            // ২. প্রোডাক্ট তৈরি (ডাটাবেজ কলাম is_active অনুযায়ী)
+            // ২. প্রোডাক্ট তৈরি (ডাটাবেজ কলাম is_active অনুযায়ী)
             $isActive = $request->has('is_active') || $request->input('status') === 'active';
 
             $product = Product::create([
@@ -132,12 +148,14 @@ class ProductController extends Controller
         $product->is_active = ($request->status === 'active') ? 1 : 0;
 
         if ($request->hasFile('images')) {
+            $cloudinary = $this->getCloudinaryClient();
+
             $newPaths = [];
             foreach ($request->file('images') as $file) {
-                $uploadedFile = Cloudinary::upload($file->getRealPath(), [
+                $uploadResult = $cloudinary->uploadApi()->upload($file->getRealPath(), [
                     'folder' => 'hypeline_products'
-                ])->getSecurePath();
-                $newPaths[] = $uploadedFile;
+                ]);
+                $newPaths[] = $uploadResult['secure_url'];
             }
             $product->images = $newPaths;
         }
