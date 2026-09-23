@@ -225,3 +225,9 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
 */
 
 require __DIR__.'/auth.php';
+
+
+Route::get('/clear-cache', function () {
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    return '<h1>App Optimized & Cache Cleared Successfully!</h1>';
+});
