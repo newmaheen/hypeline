@@ -66,13 +66,16 @@ class ProductController extends Controller
             'variants.*.size' => 'required|string|max:50',
             'variants.*.color' => 'required|string|max:50',
             'variants.*.stock' => 'required|integer|min:0',
+            'variants.*.sku' => 'nullable|string|max:100|distinct|unique:product_variants,sku',
         ], [
-            'images.min' => 'প্রোডাক্টের জন্য কমপক্ষে ৩টি ছবি আপলোড করতে হবে।',
-            'variants.min' => 'কমপক্ষে একটি সাইজ/কালার ভ্যারিয়েন্ট যোগ করতে হবে।',
+            'images.min' => 'You must upload at least 3 images for the product.',
+            'variants.min' => 'Please add at least one product variant.',
+            'variants.*.sku.unique' => 'This SKU has already been taken by another variant. Please provide a unique SKU.',
+            'variants.*.sku.distinct' => 'Duplicate SKUs found within the same submission. Each variant SKU must be unique.',
         ]);
 
         DB::transaction(function () use ($request) {
-            // ১. ছবি Cloudinary-তে সরাসরি SDK দিয়ে আপলোড
+            // 1. Image upload directly via Cloudinary SDK
             $imagePaths = [];
             if ($request->hasFile('images')) {
                 $cloudinary = $this->getCloudinaryClient();
@@ -85,7 +88,7 @@ class ProductController extends Controller
                 }
             }
 
-            // ২. প্রোডাক্ট তৈরি (ডাটাবেজ কলাম is_active অনুযায়ী)
+            // 2. Product create with database is_active mapping
             $isActive = $request->has('is_active') || $request->input('status') === 'active';
 
             $product = Product::create([
@@ -99,19 +102,23 @@ class ProductController extends Controller
                 'is_active' => $isActive ? 1 : 0,
             ]);
 
-            // ৩. ভ্যারিয়েন্ট ও স্টক সেভ
+            // 3. Save variants with guaranteed unique fallback SKU
             foreach ($request->variants as $variantData) {
+                $sku = !empty($variantData['sku']) 
+                    ? trim($variantData['sku']) 
+                    : (strtoupper(Str::slug($product->name)) . '-' . strtoupper($variantData['size']) . '-' . strtoupper(Str::random(4)));
+
                 ProductVariant::create([
                     'product_id' => $product->id,
                     'size' => $variantData['size'],
                     'color' => $variantData['color'],
-                    'sku' => $variantData['sku'] ?? (strtoupper(Str::slug($product->name)) . '-' . strtoupper($variantData['size']) . '-' . rand(100, 999)),
+                    'sku' => $sku,
                     'stock' => $variantData['stock'],
                 ]);
             }
         });
 
-        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট এবং ভ্যারিয়েন্ট সফলভাবে তৈরি হয়েছে!');
+        return redirect()->route('admin.products.index')->with('success', 'Product and variants created successfully!');
     }
 
     public function edit(Product $product)
@@ -137,7 +144,7 @@ class ProductController extends Controller
         }
 
         $request->validate($rules, [
-            'images.min' => 'নতুন ছবি দিলে কমপক্ষে ৩টি ছবি আপলোড করতে হবে।',
+            'images.min' => 'If uploading replacement images, at least 3 images are required.',
         ]);
 
         $product->category_id = $request->category_id;
@@ -162,13 +169,13 @@ class ProductController extends Controller
 
         $product->save();
 
-        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট সফলভাবে আপডেট হয়েছে!');
+        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
     }
 
     public function destroy(Product $product)
     {
         if (method_exists($product, 'orderItems') && $product->orderItems()->exists()) {
-            return back()->withErrors(['error' => 'এই প্রোডাক্টের অতীত সেলস রেকর্ড আছে, তাই ডিলিট করা যাবে না। স্ট্যাটাস Inactive করুন।']);
+            return back()->withErrors(['error' => 'This product has associated sales records and cannot be deleted. Please set its status to Inactive instead.']);
         }
 
         if (!empty($product->images) && is_array($product->images)) {
@@ -182,6 +189,6 @@ class ProductController extends Controller
         $product->variants()->delete();
         $product->delete();
 
-        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট মুছে ফেলা হয়েছে!');
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
     }
 }
