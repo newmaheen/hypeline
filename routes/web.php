@@ -231,3 +231,16 @@ Route::get('/clear-cache', function () {
     \Illuminate\Support\Facades\Artisan::call('optimize:clear');
     return '<h1>App Optimized & Cache Cleared Successfully!</h1>';
 });
+
+Route::get('/clear-cache', function () {
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    \Illuminate\Support\Facades\Artisan::call('config:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('route:clear');
+    
+    return '<div style="text-align:center; padding:50px; font-family:sans-serif;">
+                <h1 style="color:green;">✓ App Optimized & All Caches Cleared Successfully!</h1>
+                <p>Config, Cache, Views, and Routes are fresh now.</p>
+            </div>';
+});

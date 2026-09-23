@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProductController extends Controller
 {
@@ -57,18 +58,20 @@ class ProductController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            // ১. ছবি Cloudinary-তে পার্মানেন্ট আপলোড
+            // ১. ছবি Cloudinary Facade দিয়ে আপলোড
             $imagePaths = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
-                    $uploadedFile = cloudinary()->upload($file->getRealPath(), [
+                    $uploadedFile = Cloudinary::upload($file->getRealPath(), [
                         'folder' => 'hypeline_products'
                     ])->getSecurePath();
                     $imagePaths[] = $uploadedFile;
                 }
             }
 
-            // ২. প্রোডাক্ট তৈরি
+            // ২. প্রোডাক্ট তৈরি (ডাটাবেজ কলাম is_active অনুযায়ী)
+            $isActive = $request->has('is_active') || $request->input('status') === 'active';
+
             $product = Product::create([
                 'category_id' => $request->category_id,
                 'name' => $request->name,
@@ -77,7 +80,7 @@ class ProductController extends Controller
                 'price' => $request->price,
                 'sale_price' => $request->sale_price,
                 'images' => $imagePaths,
-                'status' => ($request->has('is_active') || $request->input('status') === 'active') ? 'active' : 'inactive',
+                'is_active' => $isActive ? 1 : 0,
             ]);
 
             // ৩. ভ্যারিয়েন্ট ও স্টক সেভ
@@ -118,32 +121,30 @@ class ProductController extends Controller
         }
 
         $request->validate($rules, [
-            'images.min' => 'Notun chobi dile kompokkhe 3-ti chobi upload korte hobe.',
+            'images.min' => 'নতুন ছবি দিলে কমপক্ষে ৩টি ছবি আপলোড করতে হবে।',
         ]);
 
-        $data = [
-            'category_id' => $request->category_id,
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'sale_price' => $request->sale_price,
-            'is_active' => ($request->status === 'active') ? 1 : 0, // Database column is_active update hobe
-        ];
+        $product->category_id = $request->category_id;
+        $product->name = $request->name;
+        $product->description = $request->description;
+        $product->price = $request->price;
+        $product->sale_price = $request->sale_price;
+        $product->is_active = ($request->status === 'active') ? 1 : 0;
 
         if ($request->hasFile('images')) {
             $newPaths = [];
             foreach ($request->file('images') as $file) {
-                $uploadedFile = cloudinary()->upload($file->getRealPath(), [
+                $uploadedFile = Cloudinary::upload($file->getRealPath(), [
                     'folder' => 'hypeline_products'
                 ])->getSecurePath();
                 $newPaths[] = $uploadedFile;
             }
-            $data['images'] = $newPaths;
+            $product->images = $newPaths;
         }
 
-        $product->update($data);
+        $product->save();
 
-        return redirect()->route('admin.products.index')->with('success', 'Product shofolbhabe update hoyeche!');
+        return redirect()->route('admin.products.index')->with('success', 'প্রোডাক্ট সফলভাবে আপডেট হয়েছে!');
     }
 
     public function destroy(Product $product)
