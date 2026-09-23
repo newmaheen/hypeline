@@ -1,6 +1,5 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,12 +13,10 @@
             color: #111;
         }
 
-        /* Product Page */
         .product-page {
             padding: 50px 0 80px;
         }
 
-        /* Product Container */
         .product-container {
             max-width: 1200px;
             width: 100%;
@@ -29,7 +26,6 @@
             padding-right: 15px;
         }
 
-        /* Product Image Box & Auto Zoom */
         .product-image-box {
             background: #fff;
             border-radius: 14px;
@@ -53,7 +49,6 @@
             transform-origin: center center;
         }
 
-        /* Thumbnails */
         .product-thumbnails {
             display: flex;
             gap: 10px;
@@ -85,7 +80,6 @@
             object-fit: cover;
         }
 
-        /* Product Information */
         .product-info-wrapper {
             max-width: 480px;
             margin: 0 auto;
@@ -125,7 +119,6 @@
             margin-bottom: 30px;
         }
 
-        /* Options */
         .option-title {
             font-size: 14px;
             font-weight: 700;
@@ -170,7 +163,6 @@
             text-decoration: line-through;
         }
 
-        /* Stock */
         .stock-message {
             font-size: 14px;
             margin-top: -10px;
@@ -178,7 +170,6 @@
             color: #555;
         }
 
-        /* Quantity */
         .quantity-wrapper {
             display: flex;
             align-items: center;
@@ -213,7 +204,6 @@
             outline: none;
         }
 
-        /* Add To Cart */
         .add-cart-button {
             width: 100%;
             margin-top: 25px;
@@ -237,7 +227,6 @@
             cursor: not-allowed;
         }
 
-        /* Back Link */
         .back-link {
             display: inline-block;
             margin-top: 25px;
@@ -251,7 +240,6 @@
             text-decoration: underline;
         }
 
-        /* Mobile */
         @media (max-width: 767px) {
             .product-page {
                 padding: 25px 0 50px;
@@ -281,7 +269,6 @@
         }
     </style>
 </head>
-
 <body>
 
     @include('layouts.navigation')
@@ -289,7 +276,6 @@
     <div class="product-page">
         <div class="product-container">
 
-            {{-- Success Message --}}
             @if(session('success'))
                 <div class="alert alert-success mb-4">
                     <div class="fw-semibold mb-3">{{ session('success') }}</div>
@@ -300,7 +286,6 @@
                 </div>
             @endif
 
-            {{-- Error Messages --}}
             @if($errors->any())
                 <div class="alert alert-danger mb-4">
                     <ul class="mb-0">
@@ -331,7 +316,6 @@
 
             <div class="row g-5 align-items-center justify-content-center">
 
-                {{-- PRODUCT IMAGE & AUTO ZOOM --}}
                 <div class="col-12 col-lg-6">
                     <div class="product-image-box" id="productImageBox">
                         @if($firstImage)
@@ -343,10 +327,9 @@
                         @endif
                     </div>
 
-                    {{-- Gallery Thumbnails --}}
                     @if(count($allImages) > 1)
                         <div class="product-thumbnails">
-                            @foreach($allImages as $index =>$img)
+                            @foreach ($allImages as $index =>$img)
                                 @php
                                     $thumbUrl = str_starts_with($img, 'http') ? $img : asset('storage/' .$img);
                                 @endphp
@@ -359,19 +342,15 @@
                     @endif
                 </div>
 
-                {{-- PRODUCT INFORMATION --}}
                 <div class="col-12 col-lg-6">
                     <div class="product-info-wrapper">
 
-                        {{-- Category --}}
                         <div class="product-category">
                             {{ $product->category->name ?? 'Collection' }}
                         </div>
 
-                        {{-- Product Name --}}
                         <h1 class="product-title">{{ $product->name }}</h1>
 
-                        {{-- Price --}}
                         <div class="mb-3">
                             @if($product->sale_price)
                                 <span class="product-price">৳{{ number_format($product->sale_price, 0) }}</span>
@@ -381,7 +360,6 @@
                             @endif
                         </div>
 
-                        {{-- Description --}}
                         @if($product->description)
                             <div class="product-description">
                                 {{ $product->description }}
@@ -391,10 +369,8 @@
                         <form method="POST" action="{{ route('cart.add', $product->id) }}" id="cartForm">
                             @csrf
 
-                            {{-- Hidden Variant ID --}}
                             <input type="hidden" name="variant_id" id="variant_id">
 
-                            {{-- SIZE --}}
                             @php
                                 $sizes =$product->variants
                                     ->pluck('size')
@@ -407,7 +383,7 @@
                                 <div>
                                     <div class="option-title">Select Size</div>
                                     <div class="option-buttons">
-                                        @foreach($sizes as$size)
+                                        @foreach ($sizes as$size)
                                             <button type="button" class="option-button size-button" data-size="{{ $size }}">
                                                 {{ $size }}
                                             </button>
@@ -416,7 +392,6 @@
                                 </div>
                             @endif
 
-                            {{-- COLOR --}}
                             @php
                                 $colors =$product->variants
                                     ->pluck('color')
@@ -429,7 +404,7 @@
                                 <div>
                                     <div class="option-title">Select Color</div>
                                     <div class="option-buttons">
-                                        @foreach($colors as$color)
+                                        @foreach ($colors as$color)
                                             <button type="button" class="option-button color-button" data-color="{{ $color }}">
                                                 {{ $color }}
                                             </button>
@@ -438,12 +413,10 @@
                                 </div>
                             @endif
 
-                            {{-- STOCK --}}
                             <div id="stockMessage" class="stock-message">
                                 Please select your options.
                             </div>
 
-                            {{-- QUANTITY --}}
                             <div class="option-title">Quantity</div>
                             <div class="quantity-wrapper">
                                 <button type="button" class="quantity-button" id="decreaseQuantity">−</button>
@@ -451,14 +424,11 @@
                                 <button type="button" class="quantity-button" id="increaseQuantity">+</button>
                             </div>
 
-                            {{-- ADD TO CART --}}
                             <button type="submit" id="addToCartButton" class="add-cart-button" disabled>
                                 ADD TO CART
                             </button>
-
                         </form>
 
-                        {{-- Continue Shopping --}}
                         <a href="{{ route('home') }}" class="back-link">
                             ← Continue Shopping
                         </a>
@@ -473,7 +443,6 @@
     @include('layouts.footer')
 
     <script>
-        /* === MOUSE HOVER AUTO ZOOM SCRIPT === */
         const imageBox = document.getElementById('productImageBox');
         const mainImage = document.getElementById('mainProductImage');
 
@@ -495,7 +464,6 @@
             });
         }
 
-        /* === CHANGE MAIN IMAGE FROM THUMBNAILS === */
         function changeMainImage(imageUrl, element) {
             if (mainImage) {
                 mainImage.src = imageUrl;
@@ -508,7 +476,6 @@
             }
         }
 
-        /* === VARIANT & CART SCRIPT === */
         const variants = @json($product->variants->values());
 
         let selectedSize = null;
@@ -522,7 +489,6 @@
         const stockMessage = document.getElementById('stockMessage');
         const addToCartButton = document.getElementById('addToCartButton');
 
-        /* SIZE BUTTON */
         sizeButtons.forEach(button => {
             button.addEventListener('click', function () {
                 if (this.classList.contains('disabled')) return;
@@ -533,7 +499,6 @@
             });
         });
 
-        /* COLOR BUTTON */
         colorButtons.forEach(button => {
             button.addEventListener('click', function () {
                 if (this.classList.contains('disabled')) return;
@@ -544,7 +509,6 @@
             });
         });
 
-        /* FIND MATCHING VARIANT */
         function findVariant() {
             if (variants.length === 0) {
                 addToCartButton.disabled = false;
@@ -579,7 +543,6 @@
             stockMessage.innerText = 'Available stock: ' + selectedVariant.stock;
         }
 
-        /* QUANTITY BUTTONS */
         document.getElementById('increaseQuantity').addEventListener('click', function () {
             let max = selectedVariant ? selectedVariant.stock : 100;
             let quantity = parseInt(quantityInput.value) || 1;
@@ -597,6 +560,5 @@
             }
         });
     </script>
-
 </body>
 </html>
